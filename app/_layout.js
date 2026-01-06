@@ -40,6 +40,7 @@ export default function _layout() {
           statusBarColor: "#003279",
         })}
       />
+      <Stack.Screen name="private" options={{ headerShown: false }} />
     </Stack>
   );
 }

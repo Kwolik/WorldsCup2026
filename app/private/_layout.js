@@ -1,175 +1,188 @@
-import { Stack, useRouter } from "expo-router";
+import { Tabs, useRouter } from "expo-router";
 import {
   View,
-  StyleSheet,
   Text,
-  ImageBackground,
+  StyleSheet,
   TouchableOpacity,
+  Platform,
 } from "react-native";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { MaterialIcons } from "@expo/vector-icons"; 
-import { appSignOut } from "../../store";
+import {
+  Ionicons,
+  MaterialCommunityIcons,
+  FontAwesome5,
+} from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-export default function HomeLayout() {
+const CustomHeader = ({ title, showBackButton }) => {
+  const insets = useSafeAreaInsets();
   const router = useRouter();
+
   return (
-    <Stack>
-      <Stack.Screen
+    <View
+      style={{
+        paddingTop: insets.top,
+        height: 74 + insets.top,
+        backgroundColor: "transparent",
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        paddingHorizontal: 15,
+      }}
+    >
+      {showBackButton ? (
+        <TouchableOpacity
+          onPress={() => router.back()}
+          style={styles.backButton}
+        >
+          <Ionicons name="chevron-back" size={32} color="#FFFFFF" />
+        </TouchableOpacity>
+      ) : (
+        <View style={{ width: 42 }} />
+      )}
+
+      <Text style={styles.headerTitle}>{title}</Text>
+
+      <View style={{ width: 42 }} />
+    </View>
+  );
+};
+
+export default function _layout() {
+  const insets = useSafeAreaInsets();
+
+  return (
+    <Tabs
+      screenOptions={{
+        headerTransparent: true,
+
+        tabBarStyle: {
+          backgroundColor: "#003279",
+          borderTopWidth: 0,
+          elevation: 10,
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: -2 },
+          shadowOpacity: 0.2,
+          shadowRadius: 5,
+          height: 72 + (Platform.OS === "ios" ? insets.bottom : 10),
+          paddingBottom: Platform.OS === "ios" ? insets.bottom : 10,
+        },
+        tabBarActiveTintColor: "#FFFFFF",
+        tabBarInactiveTintColor: "#94a3b8",
+        tabBarShowLabel: true,
+        header: ({ options }) => (
+          <CustomHeader title={options.title} showBackButton={true} />
+        ),
+      }}
+    >
+      <Tabs.Screen
         name="HomeScreen/index"
-        options={{ headerShown: false, statusBarColor: "#003279" }}
-      />
-      <Stack.Screen
-        name="MatchesScreen/index"
-        options={() => ({
-          title: "Mecze",
-          headerBackVisible: false,
-          headerLeft: () => (
-            <TouchableOpacity
-              style={styles.buttonBack}
-              onPress={() => router.back()}
-            >
-              <MaterialIcons
-                name="arrow-back-ios-new"
-                style={styles.iconBack}
-              />
-            </TouchableOpacity>
+        options={{
+          headerShown: false,
+          title: "Home",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="home" size={size} color={color} />
           ),
-          headerTitle: (props) => (
-            <View style={styles.header}>
-              <Text style={styles.title}>{props.children}</Text>
-            </View>
-          ),
-          headerBackground: () => (
-            <ImageBackground
-              style={styles.image}
-              source={require("../../assets/background.jpg")}
-              resizeMode="cover"
-            />
-          ),
-          statusBarColor: "#003279",
-        })}
+        }}
       />
-      <Stack.Screen
-        name="MatchScreen/index"
-        options={{ headerShown: false, statusBarColor: "#003279" }}
-      />
-      <Stack.Screen
+
+      <Tabs.Screen
         name="RankedScreen/index"
-        headerBackVisible={false}
-        options={() => ({
+        options={{
           title: "Ranking",
-          headerBackVisible: false,
-          headerLeft: () => (
-            <TouchableOpacity
-              style={styles.buttonBack}
-              onPress={() => router.back()}
-            >
-              <MaterialIcons
-                name="arrow-back-ios-new"
-                style={styles.iconBack}
-              />
-            </TouchableOpacity>
-          ),
-          headerTitle: (props) => (
-            <View style={styles.header}>
-              <Text style={styles.title}>{props.children}</Text>
-            </View>
-          ),
-          headerBackground: () => (
-            <ImageBackground
-              style={styles.image}
-              source={require("../../assets/background.jpg")}
-              resizeMode="cover"
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons
+              name="trophy-outline"
+              size={size}
+              color={color}
             />
           ),
-          statusBarColor: "#003279",
-        })}
+        }}
       />
-      <Stack.Screen
-        name="SettingsScreen/index"
-        headerBackVisible={false}
-        options={() => ({
-          title: "Profil",
-          headerBackVisible: false,
-          headerLeft: () => (
-            <TouchableOpacity
-              style={styles.buttonBack}
-              onPress={() => router.back()}
-            >
-              <MaterialIcons
-                name="arrow-back-ios-new"
-                style={styles.iconBack}
-              />
-            </TouchableOpacity>
-          ),
-          headerTitle: (props) => (
-            <View style={styles.header}>
-              <Text style={styles.title}>{props.children}</Text>
-              <TouchableOpacity
-                onPress={async () => {
-                  const resp = await appSignOut();
-                  if (!resp?.error) {
-                    router.replace("/(auth)/LoginScreen");
-                  }
-                }}
+
+      <Tabs.Screen
+        name="MatchesScreen/index"
+        options={{
+          title: "Mecze",
+          tabBarLabel: () => null,
+          tabBarIcon: ({ focused }) => (
+            <View style={styles.footballButtonContainer}>
+              <View
+                style={[
+                  styles.footballButton,
+                  { backgroundColor: focused ? "#0047AB" : "#003279" },
+                ]}
               >
-                <MaterialCommunityIcons name="logout" style={styles.iconMain} />
-              </TouchableOpacity>
+                <FontAwesome5 name="futbol" size={32} color="#FFFFFF" />
+              </View>
             </View>
           ),
-          headerBackground: () => (
-            <ImageBackground
-              style={styles.image}
-              source={require("../../assets/background.jpg")}
-              resizeMode="cover"
-            />
-          ),
-          statusBarColor: "#003279",
-        })}
+        }}
       />
-    </Stack>
+
+      <Tabs.Screen
+        name="GroupsScreen/index"
+        options={{
+          title: "Grupy",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="people-outline" size={size} color={color} />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="SettingsScreen/index"
+        options={{
+          title: "Profil",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="settings-outline" size={size} color={color} />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="MatchScreen/index"
+        options={{ href: null, headerShown: false }}
+      />
+      <Tabs.Screen
+        name="MatchScreen/styles"
+        options={{ href: null, headerShown: false }}
+      />
+    </Tabs>
   );
 }
 
 const styles = StyleSheet.create({
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    width: "90%",
-    height: 60,
-    marginTop: 2,
-  },
-  logo: {
-    width: 42,
-    height: 56,
-    marginRight: 12,
-  },
-  title: {
+  headerTitle: {
     color: "#FFFFFF",
     fontSize: 32,
     fontWeight: "bold",
-    textShadowColor: "#003279",
-    textShadowRadius: 1,
-    textShadowOffset: {
-      width: 2,
-      height: 2,
-    },
+    textAlign: "center",
+    textShadowColor: "rgba(0, 0, 0, 0.7)",
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 4,
   },
-  image: {
-    flex: 1,
+  backButton: {
+    padding: 8,
+    backgroundColor: "rgba(0,0,0,0.2)",
+    borderRadius: 20,
   },
-  iconMain: {
-    fontSize: 32,
-    color: "#FFFFFF",
-    marginLeft: 12,
+  footballButtonContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    height: 64,
+    width: 64,
+    marginBottom: Platform.OS === "ios" ? 20 : 30,
   },
-  buttonBack: {
-    position: "absolute",
-    left: -20,
-  },
-  iconBack: {
-    fontSize: 32,
-    color: "#FFFFFF",
+  footballButton: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4.65,
+    elevation: 8,
   },
 });
