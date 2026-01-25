@@ -32,7 +32,7 @@ const styles = StyleSheet.create({
     marginTop: -1,
   },
   flags: {
-    height: 46,
+    height: 72,
     width: "100%",
     backgroundColor: "#003279",
     justifyContent: "space-between",
@@ -60,6 +60,13 @@ const styles = StyleSheet.create({
     color: "#003279",
     fontWeight: "bold",
     marginBottom: 2,
+  },
+  name: {
+    width: "100%",
+    textAlign: "center",
+    color: "#FFFFFF",
+    marginTop: 4,
+    fontSize: 16,
   },
 });
 

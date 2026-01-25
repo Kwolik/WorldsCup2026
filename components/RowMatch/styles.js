@@ -5,11 +5,11 @@ const styles = StyleSheet.create({
     width: "100%",
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 20,
+    marginBottom: 8,
   },
   top: {
-    width: "100%",
-    height: 42,
+    width: "96%",
+    height: "auto",
     backgroundColor: "#003279",
     flexDirection: "row",
     justifyContent: "space-between",
@@ -33,16 +33,17 @@ const styles = StyleSheet.create({
   },
   info: {
     color: "#FFFFFF",
-    fontSize: 16,
+    fontSize: 14,
   },
   result: {
     color: "#FFFFFF",
-    fontSize: 24,
+    fontSize: 21,
     fontWeight: "bold",
+    margin: 1,
   },
   bottom: {
-    width: "100%",
-    height: 40,
+    width: "96%",
+    height: 46,
     backgroundColor: "#FFFFFF",
     alignItems: "center",
     justifyContent: "flex-end",
@@ -52,9 +53,18 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 16,
   },
   teams: {
-    color: "#003279",
-    fontSize: 16,
-    fontWeight: "bold",
+    color: "#FFFFFF",
+    fontSize: 18,
+    marginLeft: 12,
+  },
+  country: {
+    flexDirection: "row",
+    padding: 4,
+  },
+  viewResult: {
+    width: "10%",
+    alignItems: "center",
+    padding: 2,
   },
 });
 

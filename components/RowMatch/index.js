@@ -52,24 +52,64 @@ export default function RowMatch(props) {
           name="cards"
           style={[
             styles.icon,
-            props.points == 0 ? { color: "#ed1c24" } : { color: "#00c165" },
+            props.points == 0
+              ? { color: "#ed1c24" }
+              : props.points == 1 || props.points == 2
+                ? { color: "#fdee00" }
+                : { color: "#00c165" },
           ]}
         />
       )}
+      {props.points > -1 && (
+        <Text
+          style={[
+            styles.points,
+            props.points == 0
+              ? { color: "#FFFFFF" }
+              : props.points == 1 || props.points == 2
+                ? { color: "#000000" }
+                : { color: "#FFFFFF" },
+          ]}
+        >
+          {props.points}
+        </Text>
+      )}
 
       <View style={styles.top}>
-        <Text style={styles.info}>{displayData.date}</Text>
-        <CountryFlag isoCode={displayData.club1id || ""} size={28} />
-        <Text style={styles.result}>{displayData.result}</Text>
-        <CountryFlag isoCode={displayData.club2id || ""} size={28} />
-        <Text style={styles.info}>{displayData.hour}</Text>
+        <View>
+          <Text style={styles.info}>{displayData.date}</Text>
+          <Text style={styles.info}>{displayData.hour}</Text>
+        </View>
+        <View style={{ width: "70%" }}>
+          <View style={styles.country}>
+            <CountryFlag isoCode={displayData.club1id || ""} size={26} />
+            <Text style={styles.teams}>
+              {props.club1 ? props.club1 : match.club1}
+            </Text>
+          </View>
+          <View style={styles.country}>
+            <CountryFlag isoCode={displayData.club2id || ""} size={26} />
+            <Text style={styles.teams}>
+              {props.club2 ? props.club2 : match.club2}
+            </Text>
+          </View>
+        </View>
+        <View
+          style={styles.viewResult}
+        >
+          {displayData.result?.split(":").map((score, index) => (
+            <Text key={index} style={styles.result}>
+              {score}
+            </Text>
+          ))}
+        </View>
       </View>
 
-      <View style={styles.bottom}>
+      {/* <View style={styles.bottom}>
         <Text style={styles.teams}>
           {displayData.club1} - {displayData.club2}
         </Text>
-      </View>
+      </View> */}
     </TouchableOpacity>
   );
 }

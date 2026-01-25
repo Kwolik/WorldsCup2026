@@ -29,15 +29,13 @@ const CustomHeader = ({ title, showBackButton }) => {
         paddingHorizontal: 15,
       }}
     >
-      {showBackButton ? (
+      {showBackButton && (
         <TouchableOpacity
           onPress={() => router.back()}
           style={styles.backButton}
         >
           <Ionicons name="chevron-back" size={32} color="#FFFFFF" />
         </TouchableOpacity>
-      ) : (
-        <View style={{ width: 42 }} />
       )}
 
       <Text style={styles.headerTitle}>{title}</Text>
@@ -63,7 +61,7 @@ export default function _layout() {
           shadowOffset: { width: 0, height: -2 },
           shadowOpacity: 0.2,
           shadowRadius: 5,
-          height: 72 + (Platform.OS === "ios" ? insets.bottom : 10),
+          height: 80 + (Platform.OS === "ios" ? insets.bottom : 10),
           paddingBottom: Platform.OS === "ios" ? insets.bottom : 10,
         },
         tabBarActiveTintColor: "#FFFFFF",

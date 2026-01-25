@@ -1,4 +1,4 @@
-import { StyleSheet, View, ImageBackground } from "react-native";
+import { StyleSheet, View } from "react-native";
 import React from "react";
 import { AuthStore } from "../store.js";
 import { useRouter, useSegments, useRootNavigationState } from "expo-router";
@@ -14,32 +14,21 @@ export default function Page() {
   React.useEffect(() => {
     if (!navigationState?.key || !initialized) return;
 
-    const inAuthGroup = segments[0] === "(auth)";
-
-    if (!isLoggedIn && !inAuthGroup) {
+    if (!isLoggedIn) {
       router.replace("/LoginScreen");
     } else if (isLoggedIn) {
-      router.replace("/HomeScreen");
+      router.replace("/private/HomeScreen");
     }
-  }, [segments, navigationState?.key, initialized]);
+  }, [isLoggedIn, segments, navigationState?.key, initialized]);
   return (
     <View style={styles.container}>
-      <ImageBackground
-        source={require("../assets/background.jpg")}
-        style={styles.image}
-        resizeMode="stretch"
-      >
-        <LoadingScreen />
-      </ImageBackground>
+      <LoadingScreen />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-  },
-  image: {
     flex: 1,
   },
 });

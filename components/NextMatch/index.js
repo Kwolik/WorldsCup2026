@@ -48,8 +48,9 @@ export default function NextMatch() {
   };
 
   useEffect(() => {
-    setDate("2024" + month + day + hours + min);
-    nextMatch();
+    const formattedDate = "2024" + month + day + hours + min;
+    setDate(formattedDate);
+    nextMatch(formattedDate);
   }, []);
 
   useEffect(() => {
@@ -62,12 +63,11 @@ export default function NextMatch() {
     return () => clearTimeout(timer);
   }, [time]);
 
-  //Przetestować jutro tego ifa
   return (
     match[0] &&
-    match[0].date == day + "." + month &&
-    match[0].hour == hours + 1 + ":00" &&
-    min >= 45 && (
+    // match[0].date == day + "." + month &&
+    // match[0].hour == hours + 1 + ":00" &&
+    min <= 55 && (
       <TouchableOpacity
         style={styles.container}
         onPress={() =>
@@ -80,7 +80,7 @@ export default function NextMatch() {
         <View style={styles.top}>
           <View style={styles.row}>
             <Ionicons name="football-outline" style={styles.icon} />
-            <Text style={styles.info}>{match[0].date}</Text>
+            <Text style={styles.info}>{match[0]?.date}</Text>
           </View>
           <View style={styles.row}>
             <Ionicons name="timer-outline" style={styles.icon} />
@@ -90,21 +90,25 @@ export default function NextMatch() {
           </View>
         </View>
         <View style={styles.flags}>
-          <CountryFlag
-            isoCode={match[0].club1id ? match[0].club1id : ""}
-            size={32}
-            style={styles.flag}
-          />
-          <CountryFlag
-            isoCode={match[0].club2id ? match[0].club2id : ""}
-            size={32}
-            style={styles.flag}
-          />
+          <View>
+            <CountryFlag
+              isoCode={match[0]?.club1id ? match[0].club1id : ""}
+              size={28}
+              style={styles.flag}
+            />
+            <Text style={styles.name}>{match[0]?.club1}</Text>
+          </View>
+          <View>
+            <CountryFlag
+              isoCode={match[0]?.club2id ? match[0].club2id : ""}
+              size={28}
+              style={styles.flag}
+            />
+            <Text style={styles.name}>{match[0]?.club2}</Text>
+          </View>
         </View>
         <View style={styles.bottom}>
-          <Text style={styles.team}>
-            {match[0].club1} - {match[0].club2}
-          </Text>
+          <Text style={styles.team}>Obstaw mecz</Text>
         </View>
       </TouchableOpacity>
     )

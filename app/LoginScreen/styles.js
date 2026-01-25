@@ -1,13 +1,8 @@
 import { StyleSheet } from "react-native";
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   image: {
     flex: 1,
-    justifyContent: "center",
-    resizeMode: "auto", //raczej nei działa do poprawy background
   },
   email: {
     justifyContent: "center",
@@ -42,16 +37,17 @@ const styles = StyleSheet.create({
   buttons: {
     width: "80%",
     marginLeft: 10,
-    justifyContent: "center",
+    justifyContent: "space-between",
     alignItems: "center",
+    flexDirection: "row",
   },
   buttonLogged: {
-    width: 100,
-    height: 40,
+    width: 112,
+    height: 60,
     backgroundColor: "#003279",
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: 16,
+    borderRadius: 24,
   },
   buttonTitle: {
     color: "#FFFFFF",
@@ -99,6 +95,29 @@ const styles = StyleSheet.create({
     color: "#003279",
     fontWeight: "bold",
     fontSize: 16,
+  },
+  googleButton: {
+    flexDirection: "row",
+    width: "55%",
+    height: 60,
+    backgroundColor: "#FFFFFF",
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 4,
+    paddingHorizontal: 10,
+    elevation: 3,
+  },
+  googleIcon: {
+    width: 24,
+    height: 24,
+    marginRight: 4,
+    marginLeft: 4,
+    resizeMode: "contain",
+  },
+  googleButtonText: {
+    color: "#757575",
+    fontSize: 14,
+    fontWeight: "500",
   },
 });
 

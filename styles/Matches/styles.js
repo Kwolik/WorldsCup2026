@@ -17,8 +17,8 @@ const styles = StyleSheet.create({
   flatlist: {
     width: "88%",
     marginLeft: 4,
-    marginTop: 10,
-    height: "78%",
+    marginTop: 4,
+    height: "74%",
   },
 });
 
