@@ -1,5 +1,12 @@
 import { Stack } from "expo-router";
 import { View, StyleSheet, Text } from "react-native";
+import { LogBox } from 'react-native';
+
+// Ignoruj ten konkretny błąd expo-notifications w Expo Go
+LogBox.ignoreLogs([
+  'expo-notifications: Android Push notifications',
+  '`expo-notifications` functionality is not fully supported in Expo Go'
+]);
 
 export default function _layout() {
   return (

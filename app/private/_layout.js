@@ -1,4 +1,5 @@
-import { Tabs, useRouter } from "expo-router";
+import { useEffect, useState } from "react";
+import { Tabs, useRouter, usePathname } from "expo-router";
 import {
   View,
   Text,
@@ -11,11 +12,20 @@ import {
   MaterialCommunityIcons,
   FontAwesome5,
 } from "@expo/vector-icons";
+import * as Notifications from "expo-notifications";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { NotificationService } from "./../../components/NotificationService";
+import { NotificationsModal } from "./../../components/NotificationsModal/index";
 
 const CustomHeader = ({ title, showBackButton }) => {
   const insets = useSafeAreaInsets();
+  const [modalVisible, setModalVisible] = useState(false);
+  const pathname = usePathname(); // Pobiera aktualną ścieżkę
   const router = useRouter();
+
+  useEffect(() => {
+    setModalVisible(false);
+  }, [pathname]);
 
   return (
     <View
@@ -27,6 +37,7 @@ const CustomHeader = ({ title, showBackButton }) => {
         alignItems: "center",
         justifyContent: "space-between",
         paddingHorizontal: 15,
+        zIndex: 1000, // DODAJ TO
       }}
     >
       {showBackButton && (
@@ -40,13 +51,54 @@ const CustomHeader = ({ title, showBackButton }) => {
 
       <Text style={styles.headerTitle}>{title}</Text>
 
-      <View style={{ width: 42 }} />
+      {/* Dzwonek powiadomień w kółku */}
+      <View>
+        {/* Kontener dla dzwonka i okienka */}
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => setModalVisible(!modalVisible)}
+        >
+          <Ionicons name="notifications" size={32} color="#FFFFFF" />
+          <View style={styles.badge} />
+        </TouchableOpacity>
+        {/* Wywołanie okienka obok dzwonka */}
+        <NotificationsModal
+          visible={modalVisible}
+          onClose={() => setModalVisible(false)}
+        />
+      </View>
     </View>
   );
 };
 
 export default function _layout() {
   const insets = useSafeAreaInsets();
+
+  useEffect(() => {
+    NotificationService.registerForPushNotifications();
+
+    // 1. Reagowanie na powiadomienie, gdy apka jest OTWARTA
+    const foregroundSubscription =
+      Notifications.addNotificationReceivedListener((notification) => {
+        NotificationService.saveToHistory(notification);
+      });
+
+    // 2. Reagowanie na KLIKNIĘCIE w powiadomienie
+    const responseSubscription =
+      Notifications.addNotificationResponseReceivedListener((response) => {
+        const { screen, matchId } = response.notification.request.content.data;
+
+        if (screen) {
+          // Nawigacja do konkretnego meczu przez expo-router
+          router.push({ pathname: screen, params: { id: matchId } });
+        }
+      });
+
+    return () => {
+      foregroundSubscription.remove();
+      responseSubscription.remove();
+    };
+  }, []);
 
   return (
     <Tabs
@@ -182,5 +234,16 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 4.65,
     elevation: 8,
+  },
+  badge: {
+    position: "absolute",
+    top: 8,
+    right: 8,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: "#FF4B4B",
+    borderWidth: 1,
+    borderColor: "#FFFFFF",
   },
 });
