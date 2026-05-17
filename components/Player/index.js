@@ -5,55 +5,39 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { db } from "../../firebaseConfig.js";
 import { doc, onSnapshot } from "firebase/firestore";
 
+// Pomocnik do zarządzania kolorami punktów
+const getPointStatus = (pts) => {
+  if (pts <= 0) return { bg: "#FEE2E2", text: "#991B1B", label: "0 pkt" }; // Pastelowy czerwony
+  if (pts === 1 || pts === 2)
+    return { bg: "#DBEAFE", text: "#1E40AF", label: `${pts} pkt` }; // Jasnoniebieski
+  return { bg: "#D1FAE5", text: "#065F46", label: `${pts} pkt` }; // Zielony (Max)
+};
+
 export default function Player(props) {
   const [data, setData] = useState();
 
   useEffect(() => {
     const todoRef = doc(db, "users", props.id, "types", props.matchid);
-
     const unsubscribe = onSnapshot(todoRef, (docSnap) => {
       if (docSnap.exists()) {
-        console.log("Document data2:", docSnap.data());
         setData(docSnap.data());
-      } else {
-        console.log("No such document!");
       }
     });
-
     return () => unsubscribe();
   }, [props.matchid]);
+
+  if (!data || !data.type) return null;
+
+  const hasPoints = data.points !== undefined && data.points !== -1;
+  const status = getPointStatus(data.points);
+  const isPerfectScore = data.points >= 3; // Zakładam, że 3 pkt to dokładny wynik
+
   return (
-    data &&
-    data.type && (
-      <View style={styles.container}>
-        <View style={styles.top}>
-          {data && data.points != -1 && (
-            <MaterialCommunityIcons
-              name="cards"
-              style={[
-                styles.icon,
-                data.points == 0
-                  ? { color: "#ed1c24" }
-                  : data.points == 1 || data.points == 2
-                  ? { color: "#fdee00" }
-                  : { color: "#00c165" },
-              ]}
-            />
-          )}
-          {data && data.points != -1 && (
-            <Text
-              style={[
-                styles.points,
-                data.points == 0
-                  ? { color: "#FFFFFF" }
-                  : data.points == 1 || data.points == 2
-                  ? { color: "#000000" }
-                  : { color: "#FFFFFF" },
-              ]}
-            >
-              {data.points}
-            </Text>
-          )}
+    <View style={styles.container}>
+      {/* GÓRA KARTY */}
+      <View style={styles.top}>
+        {/* Kontener na Awatar i Badge punktowy */}
+        <View style={styles.avatarWrapper}>
           {props.photo ? (
             <Image style={styles.avatar} source={{ uri: props.photo }} />
           ) : (
@@ -62,12 +46,29 @@ export default function Player(props) {
               source={require("../../assets/icon.png")}
             />
           )}
-          <Text style={styles.result}>{data && data.type}</Text>
+
+          {/* Nowoczesny Badge z punktami nadpisany na awatarze */}
+          {hasPoints && (
+            <View style={[styles.badge, { backgroundColor: status.bg }]}>
+              <Text style={[styles.badgeText, { color: status.text }]}>
+                {status.label}
+              </Text>
+            </View>
+          )}
         </View>
-        <View style={styles.bottom}>
-          <Text style={styles.nick}>{props.name}</Text>
+
+        {/* Wynik typowany przez gracza */}
+        <View style={styles.resultContainer}>
+          <Text style={styles.result}>{data.type}</Text>
         </View>
       </View>
-    )
+
+      {/* DÓŁ KARTY (Nick) */}
+      <View style={styles.bottom}>
+        <Text style={styles.nick} numberOfLines={1}>
+          {props.name}
+        </Text>
+      </View>
+    </View>
   );
 }

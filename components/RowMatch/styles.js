@@ -5,11 +5,10 @@ const styles = StyleSheet.create({
     width: "100%",
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 8,
+    marginBottom: 10,
   },
   top: {
     width: "96%",
-    height: "auto",
     backgroundColor: "#003279",
     flexDirection: "row",
     justifyContent: "space-between",
@@ -34,10 +33,11 @@ const styles = StyleSheet.create({
   info: {
     color: "#FFFFFF",
     fontSize: 14,
+    margin: 2,
   },
   result: {
     color: "#FFFFFF",
-    fontSize: 21,
+    fontSize: 20,
     fontWeight: "bold",
     margin: 1,
   },
@@ -60,11 +60,12 @@ const styles = StyleSheet.create({
   country: {
     flexDirection: "row",
     padding: 4,
+    margin: 2,
   },
   viewResult: {
     width: "10%",
     alignItems: "center",
-    padding: 2,
+    padding: 8,
   },
 });
 

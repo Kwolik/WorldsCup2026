@@ -4,87 +4,122 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  bottomSheet: {
-    flex: 1,
-    justifyContent: "center",
-  },
-  contentContainer: {
-    alignItems: "center",
-    height: "auto",
-    flexWrap: "wrap",
-    flexDirection: "row",
-    justifyContent: "center",
-    padding: 4,
+  card: {
     backgroundColor: "#003279",
-    width: "98%",
-    borderRadius: 20,
-    marginLeft: 4,
+    width: "96%",
+    borderRadius: 24,
+    padding: 16,
+    marginHorizontal: "2%",
+    marginVertical: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 8, // cień na Androidzie
   },
-  viewResult: {
+  headerTitle: {
+    color: "#FFFFFF",
+    fontSize: 20,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 16,
+  },
+
+  // KROK 1: Główne przyciski 1 X 2
+  mainTypeContainer: {
     flexDirection: "row",
-    width: "90%",
+    justifyContent: "space-between",
+    width: "100%",
+    marginBottom: 20,
+  },
+  typeButton: {
+    flex: 1,
+    height: 50,
+    backgroundColor: "rgba(255, 255, 255, 0.15)", // półprzezroczysty biały
     justifyContent: "center",
     alignItems: "center",
+    borderRadius: 14,
+    marginHorizontal: 4,
   },
-  title: {
-    width: "26%",
+  activeButton: {
+    backgroundColor: "#FFFFFF", // pełny biały gdy aktywny
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 4,
+  },
+  buttonText: {
+    color: "#FFFFFF",
+    fontSize: 14,
+    fontWeight: "600",
+    textAlign: "center",
+  },
+
+  // KROK 2: Sekcja dokładnych wyników
+  scoresSection: {
+    width: "100%",
+    marginBottom: 16,
+  },
+  subTitle: {
+    color: "rgba(255, 255, 255, 0.7)",
+    fontSize: 14,
+    marginBottom: 10,
+    paddingLeft: 4,
+  },
+  scoresGrid: {
+    flexDirection: "row",
+    paddingVertical: 4,
+  },
+  scoreTile: {
+    width: 65,
+    height: 45,
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    borderRadius: 12,
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 10,
+  },
+  activeScoreTile: {
+    backgroundColor: "#00FF87", // nowoczesny zielony akcent na wybrany wynik
+    borderColor: "#00FF87",
+  },
+  scoreText: {
     color: "#FFFFFF",
     fontSize: 16,
-  },
-  typeResult: {
-    width: 56,
-    backgroundColor: "#FFFFFF",
-    height: 40,
-    borderRadius: 16,
-    justifyContent: "center",
-    alignItems: "center",
-    margin: 4,
-  },
-  resultText: {
-    color: "#003279",
-    fontSize: 18,
     fontWeight: "bold",
   },
-  result: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    width: "90%",
-    borderColor: "red",
-    borderWidth: 2,
-  },
-  inputView: {
-    marginLeft: 10,
-    width: 56,
-    backgroundColor: "#FFFFFF",
+  overtimeContainer: {
+    width: "100%",
+    backgroundColor: "rgba(0, 0, 0, 0.2)",
     borderRadius: 16,
-    height: 40,
+    padding: 12,
+    marginTop: 10,
     alignItems: "center",
-    justifyContent: "center",
   },
-  number: {
-    color: "#FFFFFF",
-    fontSize: 16,
+  overtimeTitle: {
+    color: "#FFD700", // złoty kolor ostrzeżenia/uwagi dla meczu pucharowego
+    fontSize: 13,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 12,
   },
-  overtime: {
+  overtimeButtonsRow: {
     flexDirection: "row",
-    width: "90%",
-    justifyContent: "center",
-    margin: 10,
+    justifyContent: "space-around",
+    width: "100%",
   },
-  top: {
-    width: "33%",
-    height: 64,
+  overtimeButton: {
+    flexDirection: "row",
     backgroundColor: "#FFFFFF",
-    justifyContent: "center",
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 12,
     alignItems: "center",
-    borderRadius: 20,
-    paddingLeft: 10,
-    paddingRight: 10,
-    marginLeft: 4,
-    marginRight: 4,
+    justifyContent: "center",
+    width: "46%",
   },
-  nick: {
+  overtimeButtonText: {
     color: "#003279",
     fontSize: 14,
     fontWeight: "bold",

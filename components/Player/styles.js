@@ -8,7 +8,7 @@ const styles = StyleSheet.create({
   },
   top: {
     width: "100%",
-    height: 56,
+    height: 64,
     backgroundColor: "#003279",
     flexDirection: "row",
     justifyContent: "space-between",
@@ -16,6 +16,10 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     paddingLeft: 10,
     paddingRight: 10,
+  },
+  avatarWrapper: {
+    position: "relative",
+    marginBottom: 8,
   },
   icon: {
     fontSize: 34,
@@ -31,14 +35,35 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   avatar: {
-    width: 36,
-    height: 36,
-    borderRadius: 32,
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+  },
+  // Mała pigułka punktowa podpięta pod awatar
+  badge: {
+    position: "absolute",
+    bottom: -8,
+    right: -14,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 10,
+    minWidth: 32,
+    alignItems: "center",
+  },
+  badgeText: {
+    fontSize: 12,
+    fontWeight: "bold",
+  },
+  resultContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
   },
   result: {
     color: "#FFFFFF",
     fontSize: 24,
     fontWeight: "bold",
+    letterSpacing: 0.5,
   },
   bottom: {
     width: "100%",

@@ -72,41 +72,6 @@ export default function HomeScreen() {
           <View style={{ marginLeft: 2 }}>
             <TopRanked />
           </View>
-          {/* <View style={styles.plates}>
-            <TouchableOpacity
-              style={styles.plate}
-              onPress={() => router.navigate("/private/MatchesScreen")}
-            >
-              <View style={styles.icon}>
-                <Ionicons name="football-outline" style={styles.iconMain} />
-              </View>
-              <View style={styles.bottom}>
-                <Text style={styles.name}>Mecze</Text>
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.plate}
-              onPress={() => router.navigate("/private/RankedScreen")}
-            >
-              <View style={styles.icon}>
-                <Ionicons name="star-outline" style={styles.iconMain} />
-              </View>
-              <View style={styles.bottom}>
-                <Text style={styles.name}>Ranking</Text>
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.plate}
-              onPress={() => router.navigate("/private/SettingsScreen")}
-            >
-              <View style={styles.icon}>
-                <Ionicons name="settings-outline" style={styles.iconMain} />
-              </View>
-              <View style={styles.bottom}>
-                <Text style={styles.name}>Profil</Text>
-              </View>
-            </TouchableOpacity>
-          </View> */}
           <View style={styles.matches3}>
             {nextMatches.map(
               (team, index) =>

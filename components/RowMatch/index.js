@@ -82,21 +82,27 @@ export default function RowMatch(props) {
         </View>
         <View style={{ width: "70%" }}>
           <View style={styles.country}>
-            <CountryFlag isoCode={displayData.club1id || ""} size={26} />
+            <CountryFlag
+              isoCode={displayData.club1id || ""}
+              size={26}
+              style={{ borderRadius: 4 }}
+            />
             <Text style={styles.teams}>
               {props.club1 ? props.club1 : match.club1}
             </Text>
           </View>
           <View style={styles.country}>
-            <CountryFlag isoCode={displayData.club2id || ""} size={26} />
+            <CountryFlag
+              isoCode={displayData.club2id || ""}
+              size={26}
+              style={{ borderRadius: 4 }}
+            />
             <Text style={styles.teams}>
               {props.club2 ? props.club2 : match.club2}
             </Text>
           </View>
         </View>
-        <View
-          style={styles.viewResult}
-        >
+        <View style={styles.viewResult}>
           {displayData.result?.split(":").map((score, index) => (
             <Text key={index} style={styles.result}>
               {score}
@@ -104,12 +110,6 @@ export default function RowMatch(props) {
           ))}
         </View>
       </View>
-
-      {/* <View style={styles.bottom}>
-        <Text style={styles.teams}>
-          {displayData.club1} - {displayData.club2}
-        </Text>
-      </View> */}
     </TouchableOpacity>
   );
 }

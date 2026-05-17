@@ -9,63 +9,99 @@ import LoadingScreen from "../LoadingScreen/index.js";
 
 export default function ChampionRow() {
   const [king, setKing] = useState([]);
-  const team = [];
+  const [uniqueTeams, setUniqueTeams] = useState([]);
 
   useEffect(() => {
     const todoRef = collection(db, "king");
     const unsubscribe = onSnapshot(todoRef, (querySnapshot) => {
       const kingData = [];
+      const teamsSet = new Set();
+
       querySnapshot.forEach((doc) => {
+        const data = doc.data();
         kingData.push({
           id: doc.id,
-          team: doc.data().team,
-          photo: doc.data().photo,
-          code: doc.data().code,
-          name: doc.data().name,
+          team: data.team,
+          photo: data.photo,
+          code: data.code,
+          name: data.name,
         });
+        if (data.team) {
+          teamsSet.add(data.team);
+        }
       });
+
       setKing(kingData);
+      setUniqueTeams(Array.from(teamsSet)); // Tworzy czystą tablicę unikalnych drużyn
     });
 
     return () => unsubscribe();
   }, []);
 
-  king.map((item) => team.indexOf(item.team) == -1 && team.push(item.team));
-  return team && team.length > 0 ? (
-    team.map((item, index) => (
-      <View style={styles.container} key={index}>
-        <View style={styles.top}>
-          {TeamList.map(
-            (team, index) =>
-              item == team.value && (
-                <CountryFlag isoCode={team.code} size={24} key={index} />
-              )
-          )}
-          <Text style={styles.team}>{item}</Text>
-        </View>
-        <View style={styles.bottom}>
-          {king.map(
-            (name, index) =>
-              item == name.team && (
-                <View style={styles.player} key={index}>
+  // Szybkie wyciąganie kodu flagi na podstawie nazwy teamu
+  const getFlagCode = (teamName) => {
+    const found = TeamList.find((t) => t.value === teamName);
+    return found ? found.code : "";
+  };
+
+  if (uniqueTeams.length === 0) {
+    return <LoadingScreen />;
+  }
+
+  return (
+    <View style={styles.mainWrapper}>
+      {uniqueTeams.map((teamName, index) => {
+        const flagCode = getFlagCode(teamName);
+        // Filtrujemy graczy, którzy wybrali akurat TĘ drużynę
+        const votesForTeam = king.filter((k) => k.team === teamName);
+
+        return (
+          <View style={styles.cardContainer} key={index}>
+            {/* NAGŁÓWEK KARTY (Flaga + Nazwa + Licznik) */}
+            <View style={styles.header}>
+              <View style={styles.headerLeft}>
+                {flagCode ? (
+                  <CountryFlag
+                    isoCode={flagCode}
+                    size={22}
+                    style={styles.flag}
+                  />
+                ) : null}
+                <Text style={styles.teamName}>{teamName}</Text>
+              </View>
+              <View style={styles.badge}>
+                <Text style={styles.badgeText}>
+                  {votesForTeam.length}{" "}
+                  {votesForTeam.length == 1
+                    ? "głos"
+                    : votesForTeam.length > 1 && votesForTeam.length < 5
+                      ? "głosy"
+                      : "głosów"}
+                </Text>
+              </View>
+            </View>
+
+            {/* SEKCJA Z GRACZAMI (Automatyczna siatka) */}
+            <View style={styles.playersGrid}>
+              {votesForTeam.map((player, pIndex) => (
+                <View style={styles.playerChip} key={pIndex}>
                   <Image
                     style={styles.avatar}
                     source={
-                      name.photo
-                        ? {
-                            uri: name.photo,
-                          }
+                      player.photo
+                        ? { uri: player.photo }
                         : require("../../assets/icon.png")
                     }
                   />
-                  <Text style={styles.teams}>{name.name}</Text>
+                  <Text style={styles.playerName} numberOfLines={1}>
+                    {player.name}
+                  </Text>
                 </View>
-              )
-          )}
-        </View>
-      </View>
-    ))
-  ) : (
-    <LoadingScreen />
+              ))}
+            </View>
+          </View>
+        );
+      })}
+    </View>
   );
 }

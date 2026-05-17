@@ -4,7 +4,7 @@ const styles = StyleSheet.create({
   container: {
     justifyContent: "center",
     alignItems: "center",
-    width: "50%",
+    width: "48%",
   },
   top: {
     height: 36,
@@ -44,6 +44,7 @@ const styles = StyleSheet.create({
   flag: {
     marginLeft: 16,
     marginRight: 16,
+    borderRadius: 6,
   },
   bottom: {
     height: 36,

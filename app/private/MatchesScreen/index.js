@@ -4,35 +4,44 @@ import styles from "../../../styles/Matches/styles.js";
 import NextMatch from "../../../components/NextMatch/index.js";
 import RowMatch from "../../../components/RowMatch/index.js";
 import { db } from "../../../firebaseConfig.js";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
 import LoadingScreen from "../../../components/LoadingScreen/index.js";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function MatchesScreen() {
   const [matches, setMatches] = useState([]);
-
-  const updateMachtes = async () => {
-    const todoRef = collection(db, "matches");
-    const doc_refs = await getDocs(todoRef);
-    const match = [];
-
-    doc_refs.forEach((doc) => {
-      match.push({
-        id: doc.id,
-        club1: doc.data().club1,
-        club1id: doc.data().club1id,
-        club2: doc.data().club2,
-        club2id: doc.data().club2id,
-        result: doc.data().result,
-        date: doc.data().date,
-        hour: doc.data().hour,
-      });
-    });
-    setMatches(match);
-  };
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    updateMachtes();
+    const todoRef = collection(db, "matches");
+    
+    // Dobra praktyka: sortujemy mecze po ID (czyli po dacie), aby układały się chronologicznie
+    const q = query(todoRef, orderBy("id", "asc"));
+
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const matchArray = [];
+      querySnapshot.forEach((doc) => {
+        matchArray.push({
+          id: doc.id,
+          club1: doc.data().club1,
+          club1id: doc.data().club1id,
+          club2: doc.data().club2,
+          club2id: doc.data().club2id,
+          result: doc.data().result,
+          date: doc.data().date,
+          hour: doc.data().hour,
+        });
+      });
+      
+      setMatches(matchArray);
+      setLoading(false);
+    }, (error) => {
+      console.error("Błąd pobierania meczów: ", error);
+      setLoading(false);
+    });
+
+    // Czyszczenie subskrypcji przy odmontowaniu komponentu
+    return () => unsubscribe();
   }, []);
 
   return (
@@ -45,11 +54,13 @@ export default function MatchesScreen() {
         <View style={styles.matchNext}>
           <NextMatch />
         </View>
-        {matches[0] ? (
+        
+        {!loading && matches.length > 0 ? (
           <View style={styles.flatlist}>
             <FlatList
               data={matches}
               numColumns={1}
+              keyExtractor={(item) => item.id} // Dodajemy unikalny klucz dla wydajności listy
               renderItem={({ item }) => (
                 <RowMatch
                   id={item.id}

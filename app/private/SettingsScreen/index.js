@@ -74,7 +74,8 @@ export default function SettingScreen() {
           docSnap.data().photo && setPhoto(docSnap.data().photo);
           docSnap.data().points && setPoints(docSnap.data().points);
         } else {
-          setTextSnackbar("Nie znaleziono dokumentu"), setVisibleSnackbar(true);
+          (setTextSnackbar("Nie znaleziono dokumentu"),
+            setVisibleSnackbar(true));
         }
 
         if (docSnapKing.exists()) {
@@ -93,55 +94,46 @@ export default function SettingScreen() {
   }, []);
 
   const pickImage = async () => {
-    // No permissions request is necessary for launching the image library
     let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.All,
+      mediaTypes: ImagePicker.Images,
       allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
+      aspect: [1, 1],
+      quality: 0.3,
+      base64: true,
     });
 
     if (!result.canceled) {
-      setPhoto(result.assets[0].uri);
+      // Zapisujemy string base64 z prefixem danych
+      const base64Image = `data:image/jpeg;base64,${result.assets[0].base64}`;
+      setPhoto(base64Image);
     }
   };
 
-  useEffect(() => {
-    if (url !== "") {
-      changeData();
-    }
-  }, [url]);
-
-  const uploadImage = async () => {
-    const response = await fetch(photo);
-    const blob = await response.blob();
-    const filename = auth.currentUser.uid;
-    const storageRef = ref(storage, filename);
+  const changeData = async () => {
+    if (!auth.currentUser) return;
 
     try {
-      const snapshot = await uploadBytesResumable(storageRef, blob);
-      const downloadURL = await getDownloadURL(snapshot.ref);
-      setUrl(downloadURL);
-    } catch (e) {
-      console.log(e);
-      Alert.alert("Error uploading photo");
-    }
-  };
+      const userDocRef = doc(db, "users", auth.currentUser.uid);
 
-  const changeData = () => {
-    getDoc(doc(db, "users", auth.currentUser.uid)).then((docSnap) => {
-      if (docSnap.exists()) {
-        setDoc(doc(db, "users", auth.currentUser.uid), {
+      // Zapisujemy bezpośrednio string Base64 do pola 'photo'
+      await setDoc(
+        userDocRef,
+        {
           id: auth.currentUser.uid,
           name: nameUser,
           email: auth.currentUser.email,
-          photo: url,
+          photo: photo, // Tu jest teraz nasz długi tekstowy string obrazka
           points: points,
-        });
-      }
-    });
-  };
+        },
+        { merge: true },
+      ); // Merge: true zapobiega nadpisywaniu innych pól
 
+      setVisible(true); // Pokazujemy Snackbar
+    } catch (e) {
+      console.error("Błąd zapisu:", e);
+      Alert.alert("Błąd zapisu danych");
+    }
+  };
   const betFootballer = () => {
     if (kingFootballer != "") {
       setVisible(!visible);
@@ -205,9 +197,7 @@ export default function SettingScreen() {
             <View style={styles.bottom}>
               <TouchableOpacity
                 style={styles.viewBottom}
-                onPress={() => {
-                  uploadImage(), setVisible(!visible);
-                }}
+                onPress={() => changeData()}
               >
                 <Foundation name="pencil" style={styles.icon} />
                 <Text style={styles.desc}>Edytuj swoje dane</Text>
@@ -245,7 +235,7 @@ export default function SettingScreen() {
                   (day + "." + month == "14.06" && hours < "21")
                     ? true
                     : false
-                } //lol
+                }
               ></TextInput>
               {day + "." + month < "14.06" ||
               (day + "." + month == "14.06" && hours < "21") ? (

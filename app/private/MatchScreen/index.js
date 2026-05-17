@@ -28,6 +28,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 export default function MatchScreen() {
   const [match, setMatch] = useState(null);
   const [userInfo, setUserInfo] = useState([]);
+  const [loading, setLoading] = useState(true); // Dodatkowy stan ładowania dla pewności
 
   const { id } = useLocalSearchParams();
   const router = useRouter();
@@ -42,6 +43,7 @@ export default function MatchScreen() {
     if (docSnap.exists()) {
       setMatch(docSnap.data());
     }
+    setLoading(false); // Dane meczu dotarły, kończymy ładowanie
   };
 
   const users = async () => {
@@ -61,9 +63,14 @@ export default function MatchScreen() {
   };
 
   useEffect(() => {
+    // KLUCZOWY KROK: Resetujemy stany przed pobraniem nowych danych.
+    // Dzięki temu natychmiast po zmianie id wyskakuje ekran ładowania.
+    setMatch(null);
+    setLoading(true);
+
     updateMatches();
     users();
-  }, [id]);
+  }, [id]); // Wywoła się zawsze, gdy id ulegnie zmianie
 
   const now = new Date();
   let day = now.getDate();
@@ -73,7 +80,19 @@ export default function MatchScreen() {
   const currentFormattedDate = day + "." + month;
   const currentHour = now.getHours();
 
-  return match && match.club1 ? (
+  // Zmieniony warunek: jeśli aplikacja jest w trakcie ładowania lub nie ma danych meczu, pokazujemy loader
+  if (loading || !match || !match.club1) {
+    return (
+      <ImageBackground
+        source={require("../../../assets/backgroundMatch.jpg")}
+        style={styles.image}
+      >
+        <LoadingScreen />
+      </ImageBackground>
+    );
+  }
+
+  return (
     <ImageBackground
       source={require("../../../assets/backgroundMatch.jpg")}
       style={styles.image}
@@ -82,8 +101,8 @@ export default function MatchScreen() {
         style={{
           paddingTop: insets.top,
           backgroundColor: "#003279",
-          borderBottomLeftRadius: "60%",
-          borderBottomRightRadius: "60%",
+          borderBottomLeftRadius: 60, 
+          borderBottomRightRadius: 60,
         }}
       >
         <View style={styles.top}>
@@ -95,11 +114,13 @@ export default function MatchScreen() {
             <CountryFlag
               isoCode={match.club1id ? match.club1id : ""}
               size={42}
+              style={{ borderRadius: 6 }}
             />
             <Text style={styles.result}>{match.result}</Text>
             <CountryFlag
               isoCode={match.club2id ? match.club2id : ""}
               size={42}
+              style={{ borderRadius: 6 }}
             />
           </View>
         </View>
@@ -110,7 +131,7 @@ export default function MatchScreen() {
         </View>
       </View>
 
-      <View style={{ marginTop: 10, paddingTop: 4 }}>
+      <View style={{ flex: 1 }}>
         <FlatList
           data={userInfo}
           numColumns={3}
@@ -138,26 +159,6 @@ export default function MatchScreen() {
           type={match.typeMatch}
         />
       ) : null}
-
-      {Platform.OS === "ios" && (
-        <View style={styles.buttonBack}>
-          <TouchableOpacity style={styles.back} onPress={() => router.back()}>
-            <MaterialIcons
-              name="arrow-back-ios-new"
-              size={24}
-              color={"#FFFFFF"}
-            />
-            <Text style={styles.textBack}>Powrót do listy meczy</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-    </ImageBackground>
-  ) : (
-    <ImageBackground
-      source={require("../../../assets/backgroundMatch.jpg")}
-      style={styles.image}
-    >
-      <LoadingScreen />
     </ImageBackground>
   );
 }

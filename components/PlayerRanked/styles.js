@@ -26,9 +26,9 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   avatar: {
-    width: 42,
-    height: 42,
-    borderRadius: 42,
+    width: 44,
+    height: 44,
+    borderRadius: 44,
   },
   result: {
     color: "#FFFFFF",
