@@ -7,85 +7,82 @@ import {
   TextInput,
   TouchableOpacity,
   FlatList,
+  Modal,
 } from "react-native";
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import styles from "../../../styles/Settings/styles.js";
 import { Foundation } from "@expo/vector-icons";
 import RowMatch from "../../../components/RowMatch/index.js";
 import * as ImagePicker from "expo-image-picker";
-import { storage } from "../../../firebaseConfig.js";
-import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { auth, db } from "../../../firebaseConfig.js";
 import { doc, getDoc, setDoc, getDocs, collection } from "firebase/firestore";
-import { TeamList } from "../../../components/TeamList.js";
 import LoadingScreen from "../../../components/LoadingScreen/index.js";
 import { Snackbar } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
+import CountryFlag from "react-native-country-flag";
+import { TeamList } from "../../../components/TeamList.js";
 
 export default function SettingScreen() {
-  const [points, setPoints] = useState();
+  const [points, setPoints] = useState(0);
   const [photo, setPhoto] = useState("");
   const [nameUser, setNameUser] = useState("");
   const [kingFootballer, setKingFootballer] = useState("");
   const [champion, setChampion] = useState("");
   const [codeChampion, setCodeChampion] = useState("");
-  const [url, setUrl] = useState("");
   const [matches, setMatches] = useState([]);
-  const [visible, setVisible] = React.useState(false);
+  const [visible, setVisible] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+
   const onDismissSnackBar = () => setVisible(false);
 
-  var day = new Date().getDate(); //Current Date
-  if (day < 10) day = "0" + day;
-  var month = new Date().getMonth() + 1; //Current Month
-  if (month < 10) month = "0" + month;
-  var hours = new Date().getHours(); //Current Hours
-
-  const handleSheetChanges = useCallback((index) => {
-    console.log("handleSheetChanges", index);
-  }, []);
+  const isBettingOpen = () => {
+    const now = new Date();
+    const deadline = new Date(2026, 5, 11, 21, 0); // 11 czerwca 2026, 21:00
+    return now < deadline;
+  };
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
-      if (user) {
+      if (!user) return;
+
+      try {
         const docRef = doc(db, "users", user.uid);
         const docKing = doc(db, "king", user.uid);
         const docFootballer = doc(db, "footballer", user.uid);
-        const docSnap = await getDoc(docRef);
-        const docSnapKing = await getDoc(docKing);
-        const docSnapFootballer = await getDoc(docFootballer);
+
+        const [docSnap, docSnapKing, docSnapFootballer] = await Promise.all([
+          getDoc(docRef),
+          getDoc(docKing),
+          getDoc(docFootballer),
+        ]);
 
         const todoRef = collection(db, "users", user.uid, "types");
         const doc_refs = await getDocs(todoRef);
-        const match = [];
-
-        doc_refs.forEach((doc) => {
-          match.push({
-            id: doc.id,
-            points: doc.data().points,
-            type: doc.data().type,
-            winner: doc.data().winner,
-          });
-        });
-        setMatches(match);
+        const fetchedMatches = doc_refs.docs.map((document) => ({
+          id: document.id,
+          points: document.data().points,
+          type: document.data().type,
+          winner: document.data().winner,
+        }));
+        setMatches(fetchedMatches);
 
         if (docSnap.exists()) {
-          docSnap.data().name && setNameUser(docSnap.data().name);
-          docSnap.data().photo && setPhoto(docSnap.data().photo);
-          docSnap.data().points && setPoints(docSnap.data().points);
-        } else {
-          (setTextSnackbar("Nie znaleziono dokumentu"),
-            setVisibleSnackbar(true));
+          const data = docSnap.data();
+          if (data.name) setNameUser(data.name);
+          if (data.photo) setPhoto(data.photo);
+          if (data.points !== undefined) setPoints(data.points);
         }
 
         if (docSnapKing.exists()) {
-          docSnapKing.data().team && setChampion(docSnapKing.data().team);
-          docSnapKing.data().code && setCodeChampion(docSnapKing.data().code);
+          setChampion(docSnapKing.data().team || "");
+          setCodeChampion(docSnapKing.data().code || "");
         }
 
         if (docSnapFootballer.exists()) {
-          docSnapFootballer.data().name &&
-            setKingFootballer(docSnapFootballer.data().name);
+          setKingFootballer(docSnapFootballer.data().name || "");
         }
+      } catch (error) {
+        Alert.alert("Błąd podczas ładowania danych profilu:", error.message);
       }
     });
 
@@ -101,10 +98,8 @@ export default function SettingScreen() {
       base64: true,
     });
 
-    if (!result.canceled) {
-      // Zapisujemy string base64 z prefixem danych
-      const base64Image = `data:image/jpeg;base64,${result.assets[0].base64}`;
-      setPhoto(base64Image);
+    if (!result.canceled && result.assets?.[0]?.base64) {
+      setPhoto(`data:image/jpeg;base64,${result.assets[0].base64}`);
     }
   };
 
@@ -113,50 +108,67 @@ export default function SettingScreen() {
 
     try {
       const userDocRef = doc(db, "users", auth.currentUser.uid);
-
-      // Zapisujemy bezpośrednio string Base64 do pola 'photo'
       await setDoc(
         userDocRef,
         {
           id: auth.currentUser.uid,
           name: nameUser,
           email: auth.currentUser.email,
-          photo: photo, // Tu jest teraz nasz długi tekstowy string obrazka
+          photo: photo,
           points: points,
         },
         { merge: true },
-      ); // Merge: true zapobiega nadpisywaniu innych pól
-
-      setVisible(true); // Pokazujemy Snackbar
+      );
+      setVisible(true);
     } catch (e) {
-      console.error("Błąd zapisu:", e);
       Alert.alert("Błąd zapisu danych");
     }
   };
-  const betFootballer = () => {
-    if (kingFootballer != "") {
-      setVisible(!visible);
-      setDoc(doc(db, "footballer", auth.currentUser.uid), {
+
+  const betFootballer = async () => {
+    if (!auth.currentUser || kingFootballer.trim() === "") return;
+    try {
+      await setDoc(doc(db, "footballer", auth.currentUser.uid), {
         id: auth.currentUser.uid,
         name: kingFootballer,
         photo: photo,
         nameUser: nameUser,
       });
+      setVisible(true);
+    } catch (e) {
+      Alert.alert("Błąd zapisu króla strzelców:", e.message);
     }
   };
 
-  const betKing = () => {
-    if (champion != "") {
-      setVisible(!visible);
-      setDoc(doc(db, "king", auth.currentUser.uid), {
+  // Funkcja uruchamiana po kliknięciu kraju na liście modalnej
+  const selectChampion = async (selectedTeam) => {
+    if (!auth.currentUser) return;
+
+    const flagCode = selectedTeam.code.startsWith("GB-")
+      ? selectedTeam.code.toLowerCase()
+      : selectedTeam.code;
+
+    setChampion(selectedTeam.value);
+    setCodeChampion(flagCode);
+    setModalVisible(false);
+
+    try {
+      await setDoc(doc(db, "king", auth.currentUser.uid), {
         id: auth.currentUser.uid,
-        code: codeChampion,
-        team: champion,
+        code: flagCode,
+        team: selectedTeam.value,
         photo: photo,
         name: nameUser,
       });
+      setVisible(true);
+    } catch (e) {
+      Alert.alert("Błąd zapisu mistrza:", e.message);
     }
   };
+
+  if (!nameUser) {
+    return <LoadingScreen />;
+  }
 
   return (
     <ImageBackground
@@ -165,115 +177,145 @@ export default function SettingScreen() {
       resizeMode="stretch"
     >
       <SafeAreaView style={styles.container}>
-        {nameUser ? (
-          <View style={styles.profile}>
-            <TouchableOpacity onPress={() => pickImage()} style={styles.button}>
-              {photo ? (
-                <Image style={styles.avatar} source={{ uri: photo }} />
-              ) : (
-                <Image
-                  style={styles.avatar}
-                  source={require("../../../assets/icon.png")}
-                />
-              )}
-            </TouchableOpacity>
-            <View style={styles.top}>
-              <View style={styles.space}></View>
-              <TextInput
-                style={styles.nick}
-                onChangeText={setNameUser}
-                value={nameUser}
-                maxLength={12}
-                autoComplete="username"
-                keyboardType="default"
-                textContentType="nickname"
-              ></TextInput>
-              <View style={styles.viewPoints}>
-                <Text style={styles.points}>{points} </Text>
-                <Text style={styles.nick}>pkt</Text>
-              </View>
-            </View>
-            <View style={styles.bottom}>
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => setModalVisible(false)}
+        >
+          <View style={styles.viewModal}>
+            <View style={styles.viewModal2}>
+              <Text style={styles.textModal}>Wybierz Mistrza Świata 2026</Text>
+
+              <FlatList
+                data={TeamList}
+                keyExtractor={(item) => item.code}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    onPress={() => selectChampion(item)}
+                    style={styles.country}
+                  >
+                    <CountryFlag
+                      isoCode={
+                        item.code.startsWith("GB-")
+                          ? item.code.toLowerCase()
+                          : item.code
+                      }
+                      size={24}
+                      style={styles.countryFlag}
+                    />
+                    <Text style={styles.countryText}>{item.value}</Text>
+                  </TouchableOpacity>
+                )}
+              />
+
               <TouchableOpacity
-                style={styles.viewBottom}
-                onPress={() => changeData()}
+                onPress={() => setModalVisible(false)}
+                style={styles.close}
               >
-                <Foundation name="pencil" style={styles.icon} />
-                <Text style={styles.desc}>Edytuj swoje dane</Text>
+                <Text style={styles.closeText}>Zamknij</Text>
               </TouchableOpacity>
             </View>
           </View>
-        ) : (
-          <LoadingScreen />
-        )}
-        {nameUser ? (
-          <View style={styles.profile}>
-            <View style={styles.top}>
-              <Text style={styles.info1}>Mistrz</Text>
-              <Text style={styles.type1}>{champion}</Text>
-              {day + "." + month < "14.06" ||
-              (day + "." + month == "14.06" && hours < "21") ? (
-                <TouchableOpacity onPress={() => betKing()}>
-                  <Foundation name="pencil" style={styles.icon1} />
-                </TouchableOpacity>
-              ) : (
-                <View></View>
-              )}
-            </View>
-            <View style={styles.bottomKing}>
-              <Text style={styles.info2}>Król strzelców</Text>
-              <TextInput
-                style={styles.type2}
-                onChangeText={setKingFootballer}
-                value={kingFootballer}
-                autoComplete="name"
-                keyboardType="default"
-                textContentType="name"
-                editable={
-                  day + "." + month < "14.06" ||
-                  (day + "." + month == "14.06" && hours < "21")
-                    ? true
-                    : false
-                }
-              ></TextInput>
-              {day + "." + month < "14.06" ||
-              (day + "." + month == "14.06" && hours < "21") ? (
-                <TouchableOpacity onPress={() => betFootballer()}>
-                  <Foundation name="pencil" style={styles.icon2} />
-                </TouchableOpacity>
-              ) : (
-                <View></View>
-              )}
+        </Modal>
+
+        <View style={styles.profile}>
+          <TouchableOpacity onPress={pickImage} style={styles.button}>
+            <Image
+              style={styles.avatar}
+              source={
+                photo ? { uri: photo } : require("../../../assets/icon.png")
+              }
+            />
+          </TouchableOpacity>
+          <View style={styles.top}>
+            <View style={styles.space} />
+            <TextInput
+              style={styles.nick}
+              onChangeText={setNameUser}
+              value={nameUser}
+              maxLength={12}
+              autoComplete="username"
+              textContentType="nickname"
+            />
+            <View style={styles.viewPoints}>
+              <Text style={styles.points}>{points} </Text>
+              <Text style={styles.nick}>pkt</Text>
             </View>
           </View>
-        ) : (
-          <LoadingScreen />
-        )}
-        {matches && matches[0] && (
+          <View style={styles.bottom}>
+            <TouchableOpacity style={styles.viewBottom} onPress={changeData}>
+              <Foundation name="pencil" style={styles.icon} />
+              <Text style={styles.desc}>Edytuj swoje dane</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        <View style={styles.profile}>
+          <View style={styles.top}>
+            <Text style={styles.info1}>Mistrz Świata</Text>
+
+            <View
+              style={styles.champion}
+            >
+              {codeChampion ? (
+                <CountryFlag
+                  isoCode={codeChampion}
+                  size={18}
+                  style={{ marginRight: 6, borderRadius: 3 }}
+                />
+              ) : null}
+              <Text style={styles.type1}>{champion || "Nie wybrano"}</Text>
+            </View>
+
+            {isBettingOpen() && (
+              <TouchableOpacity onPress={() => setModalVisible(true)}>
+                <Foundation name="pencil" style={styles.icon1} />
+              </TouchableOpacity>
+            )}
+          </View>
+          <View style={styles.bottomKing}>
+            <Text style={styles.info2}>Król strzelców</Text>
+            <TextInput
+              style={styles.type2}
+              onChangeText={setKingFootballer}
+              value={kingFootballer}
+              autoComplete="name"
+              textContentType="name"
+              editable={isBettingOpen()}
+            />
+            {isBettingOpen() && (
+              <TouchableOpacity onPress={betFootballer}>
+                <Foundation name="pencil" style={styles.icon2} />
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
+
+        {matches.length > 0 && (
           <View style={styles.flatlist}>
             <FlatList
               data={matches}
-              numColumns={1}
+              keyExtractor={(item) => item.id}
               renderItem={({ item }) => (
                 <RowMatch
                   id={item.id}
                   type={item.type}
                   points={item.points}
-                  winner={item.winenr}
+                  winner={item.winner}
                 />
               )}
             />
           </View>
         )}
+
         <Snackbar
           visible={visible}
           style={{ backgroundColor: "#003279" }}
           onDismiss={onDismissSnackBar}
           action={{
-            label: "Undo",
-            onPress: () => {
-              onDismissSnackBar;
-            },
+            label: "OK",
+            onPress: onDismissSnackBar,
           }}
         >
           Poprawnie zmieniono dane

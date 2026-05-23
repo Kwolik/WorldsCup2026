@@ -7,10 +7,10 @@ import { doc, onSnapshot } from "firebase/firestore";
 
 // Pomocnik do zarządzania kolorami punktów
 const getPointStatus = (pts) => {
-  if (pts <= 0) return { bg: "#FEE2E2", text: "#991B1B", label: "0 pkt" }; // Pastelowy czerwony
+  if (pts <= 0) return { bg: "#ed1c24", text: "#FFFFFF", label: "0 pkt" };
   if (pts === 1 || pts === 2)
-    return { bg: "#DBEAFE", text: "#1E40AF", label: `${pts} pkt` }; // Jasnoniebieski
-  return { bg: "#D1FAE5", text: "#065F46", label: `${pts} pkt` }; // Zielony (Max)
+    return { bg: "#fdee00", text: "#003279", label: `${pts} pkt` };
+  return { bg: "#00c165", text: "#FFFFFF", label: `${pts} pkt` };
 };
 
 export default function Player(props) {

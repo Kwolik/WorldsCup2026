@@ -35,7 +35,6 @@ export const TeamList = [
   { value: "Nowa Zelandia", code: "nz" },
   { value: "Panama", code: "pa" },
   { value: "Paragwaj", code: "py" },
-  { value: "Polska", code: "pl" },
   { value: "Portugalia", code: "pt" },
   { value: "Południowa Afryka", code: "za" },
   { value: "Senegal", code: "sn" },

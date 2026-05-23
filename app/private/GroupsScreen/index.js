@@ -187,7 +187,8 @@ export default function GroupsScreen() {
     return (
       <ImageBackground
         source={require("../../../assets/background.jpg")}
-        style={styles.backgroundImage}
+        style={styles.image}
+        resizeMode="stretch"
       >
         <SafeAreaView style={[styles.container, styles.center]}>
           <ActivityIndicator size="large" color="#003279" />
@@ -203,7 +204,8 @@ export default function GroupsScreen() {
     return (
       <ImageBackground
         source={require("../../../assets/background.jpg")}
-        style={styles.backgroundImage}
+        style={styles.image}
+        resizeMode="stretch"
       >
         <SafeAreaView style={[styles.container, styles.center]}>
           <Text style={styles.errorText}>{error}</Text>

@@ -7,7 +7,6 @@ const styles = StyleSheet.create({
   },
   image: {
     flex: 1,
-    resizeMode: "auto", //upewnic sie czy background dobrze sie skaluje
   },
   profile: {
     borderColor: "red",
@@ -122,6 +121,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     zIndex: -2,
   },
+  champion: {
+    flexDirection: "row",
+    alignItems: "center",
+    width: 180,
+  },
   info1: {
     width: 100,
     color: "#FFFFFF",
@@ -133,19 +137,18 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginBottom: 4,
   },
-  icon1: { fontSize: 20, color: "#FFFFFF" },
+  icon1: { fontSize: 22, color: "#FFFFFF" },
   icon2: {
-    fontSize: 20,
+    fontSize: 22,
     color: "#003279",
-    marginBottom: 2,
+    marginBottom: 4,
   },
   flatlist: {
-    bottom: "10%",
-    backgroundColor: "black",
-    width: "88%",
+    bottom: "8%",
+    width: "89%",
     marginLeft: 4,
     position: "absolute",
-    height: "65%",
+    height: "69%",
   },
   bottomSheet: {
     flex: 1,
@@ -181,6 +184,52 @@ const styles = StyleSheet.create({
   },
   teamText: {
     color: "#FFFFFF",
+  },
+  viewModal: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.67)",
+  },
+  viewModal2: {
+    backgroundColor: "#003279",
+    width: "85%",
+    height: "74%",
+    borderRadius: 12,
+    padding: 16,
+  },
+  textModal: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 12,
+    textAlign: "center",
+  },
+  country: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: "#334155",
+  },
+  countryFlag: {
+    borderRadius: 4,
+    marginRight: 18,
+  },
+  countryText: {
+    color: "#fff",
+    fontSize: 16,
+  },
+  close: {
+    backgroundColor: "#ed1c24",
+    padding: 10,
+    borderRadius: 6,
+    marginTop: 12,
+    alignItems: "center",
+  },
+  closeText: {
+    color: "#fff",
+    fontWeight: "bold",
   },
 });
 
