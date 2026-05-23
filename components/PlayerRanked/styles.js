@@ -2,7 +2,7 @@ import { StyleSheet } from "react-native";
 
 const styles = StyleSheet.create({
   container: {
-    width: "45%",
+    width: "44%",
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 12,
@@ -11,7 +11,7 @@ const styles = StyleSheet.create({
   },
   top: {
     width: "100%",
-    height: 56,
+    height: 64,
     backgroundColor: "#003279",
     flexDirection: "row",
     justifyContent: "space-between",
@@ -26,9 +26,9 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   avatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 44,
+    width: 46,
+    height: 46,
+    borderRadius: 28,
   },
   result: {
     color: "#FFFFFF",

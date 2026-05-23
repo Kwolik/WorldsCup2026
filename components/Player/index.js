@@ -5,7 +5,6 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { db } from "../../firebaseConfig.js";
 import { doc, onSnapshot } from "firebase/firestore";
 
-// Pomocnik do zarządzania kolorami punktów
 const getPointStatus = (pts) => {
   if (pts <= 0) return { bg: "#ed1c24", text: "#FFFFFF", label: "0 pkt" };
   if (pts === 1 || pts === 2)
@@ -34,9 +33,7 @@ export default function Player(props) {
 
   return (
     <View style={styles.container}>
-      {/* GÓRA KARTY */}
       <View style={styles.top}>
-        {/* Kontener na Awatar i Badge punktowy */}
         <View style={styles.avatarWrapper}>
           {props.photo ? (
             <Image style={styles.avatar} source={{ uri: props.photo }} />

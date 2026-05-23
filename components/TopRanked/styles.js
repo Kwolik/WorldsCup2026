@@ -13,8 +13,8 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   avatar: {
-    width: 54,
-    height: 54,
+    width: 62,
+    height: 62,
     borderRadius: 40,
     top: -4,
   },
@@ -56,8 +56,8 @@ const styles = StyleSheet.create({
     borderRadius: 18,
   },
   avatarFirst: {
-    width: 66,
-    height: 66,
+    width: 72,
+    height: 72,
     borderRadius: 46,
     top: -8,
   },

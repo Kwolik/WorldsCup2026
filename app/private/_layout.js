@@ -20,7 +20,7 @@ import { NotificationsModal } from "./../../components/NotificationsModal/index"
 const CustomHeader = ({ title, showBackButton }) => {
   const insets = useSafeAreaInsets();
   const [modalVisible, setModalVisible] = useState(false);
-  const pathname = usePathname(); // Pobiera aktualną ścieżkę
+  const pathname = usePathname();
   const router = useRouter();
 
   useEffect(() => {
@@ -31,13 +31,12 @@ const CustomHeader = ({ title, showBackButton }) => {
     <View
       style={{
         paddingTop: insets.top,
-        height: 74 + insets.top,
+        height: 60 + insets.top,
         backgroundColor: "transparent",
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
-        paddingHorizontal: 15,
-        zIndex: 1000, // DODAJ TO
+        zIndex: 1000,
       }}
     >
       {showBackButton && (
@@ -50,10 +49,9 @@ const CustomHeader = ({ title, showBackButton }) => {
       )}
 
       <Text style={styles.headerTitle}>{title}</Text>
-
+      <View style={styles.backButton}></View>
       {/* Dzwonek powiadomień w kółku */}
-      <View>
-        {/* Kontener dla dzwonka i okienka */}
+      {/* <View>
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => setModalVisible(!modalVisible)}
@@ -61,12 +59,11 @@ const CustomHeader = ({ title, showBackButton }) => {
           <Ionicons name="notifications" size={32} color="#FFFFFF" />
           <View style={styles.badge} />
         </TouchableOpacity>
-        {/* Wywołanie okienka obok dzwonka */}
         <NotificationsModal
           visible={modalVisible}
           onClose={() => setModalVisible(false)}
         />
-      </View>
+      </View> */}
     </View>
   );
 };
@@ -104,7 +101,6 @@ export default function _layout() {
     <Tabs
       screenOptions={{
         headerTransparent: true,
-
         tabBarStyle: {
           backgroundColor: "#003279",
           borderTopWidth: 0,
@@ -206,14 +202,14 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 32,
     fontWeight: "bold",
-    textAlign: "center",
     textShadowColor: "rgba(0, 0, 0, 0.7)",
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 4,
+    marginLeft: -24,
   },
   backButton: {
     padding: 8,
-    backgroundColor: "rgba(0,0,0,0.2)",
+    //backgroundColor: "rgba(0,0,0,0.2)",
     borderRadius: 20,
   },
   footballButtonContainer: {

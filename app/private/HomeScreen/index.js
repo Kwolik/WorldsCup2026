@@ -6,7 +6,6 @@ import TopRanked from "../../../components/TopRanked/index.js";
 import RowMatch from "../../../components/RowMatch/index.js";
 import ChampionRow from "../../../components/ChampionRow/index.js";
 import KingFootballerRow from "../../../components/KingFootballerRow/index.js";
-import { useRouter } from "expo-router";
 import { db } from "../../../firebaseConfig.js";
 import {
   where,
@@ -20,25 +19,43 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function HomeScreen() {
   const [nextMatches, setNextMatches] = useState([]);
-  var day = new Date().getDate(); //Current Date
-  if (day < 10) day = "0" + day;
-  var month = new Date().getMonth() + 1; //Current Month
-  if (month < 10) month = "0" + month;
-  var year = new Date().getFullYear(); //Current Year
+  const today = new Date();
+  const yesterday = new Date();
+  yesterday.setDate(today.getDate() - 1); // Odmierzanie wczorajszego dnia (obsługuje przełomy miesięcy/lat)
+
+  // Formatowanie do postaci "DD.MM" (z zerami wiodącymi)
+  const formatDateString = (dateObj) => {
+    return dateObj.toLocaleDateString("pl-PL", {
+      day: "2-digit",
+      month: "2-digit",
+    });
+  };
+
+  const todayStr = formatDateString(today); // np. "23.05"
+  const yesterdayStr = formatDateString(yesterday); // np. "22.05"
+
+  // Generowanie ID do zapytania Firestore (RRRRMMDD)
+  const getFirestoreDateId = (dateObj) => {
+    const y = dateObj.getFullYear();
+    const m = String(dateObj.getMonth() + 1).padStart(2, "0");
+    const d = String(dateObj.getDate()).padStart(2, "0");
+    return `${y}${m}${d}`;
+  };
 
   const next3Matches = async () => {
-    const todoRef = collection(db, "matches");
-    const q = query(
-      todoRef,
-      where("id", ">", year + month + day - 1),
-      orderBy("id"),
-      limit(10)
-    );
-    const doc_refs = await getDocs(q);
-    const match = [];
+    try {
+      const todoRef = collection(db, "matches");
+      const yesterdayId = getFirestoreDateId(yesterday);
 
-    doc_refs.forEach((doc) => {
-      match.push({
+      const q = query(
+        todoRef,
+        where("id", ">=", yesterdayId),
+        orderBy("id"),
+        limit(10),
+      );
+
+      const doc_refs = await getDocs(q);
+      const fetchedMatches = doc_refs.docs.map((doc) => ({
         id: doc.id,
         club1: doc.data().club1,
         club1id: doc.data().club1id,
@@ -47,17 +64,18 @@ export default function HomeScreen() {
         result: doc.data().result,
         date: doc.data().date,
         hour: doc.data().hour,
-      });
-    });
-    console.log(match);
-    setNextMatches(match);
+      }));
+
+      setNextMatches(fetchedMatches);
+    } catch (error) {
+      console.error("Błąd podczas pobierania meczów głównego ekranu:", error);
+    }
   };
 
   useEffect(() => {
     next3Matches();
   }, []);
 
-  const router = useRouter();
   return (
     <ImageBackground
       source={require("../../../assets/background.jpg")}
@@ -72,12 +90,13 @@ export default function HomeScreen() {
           <View style={{ marginLeft: 2 }}>
             <TopRanked />
           </View>
+
           <View style={styles.matches3}>
             {nextMatches.map(
               (team, index) =>
-                team.date == day + "." + month && (
+                team.date === todayStr && (
                   <RowMatch
-                    key={index}
+                    key={`today-${team.id}-${index}`}
                     id={team.id}
                     club1={team.club1}
                     club1id={team.club1id}
@@ -87,15 +106,16 @@ export default function HomeScreen() {
                     hour={team.hour}
                     result={team.result}
                   />
-                )
+                ),
             )}
           </View>
+
           <View style={styles.matches3}>
             {nextMatches.map(
               (team, index) =>
-                team.date == day - 1 + "." + month && (
+                team.date === yesterdayStr && (
                   <RowMatch
-                    key={index}
+                    key={`yesterday-${team.id}-${index}`}
                     id={team.id}
                     club1={team.club1}
                     club1id={team.club1id}
@@ -105,9 +125,10 @@ export default function HomeScreen() {
                     hour={team.hour}
                     result={team.result}
                   />
-                )
+                ),
             )}
           </View>
+
           <View style={styles.matches3}>
             <ChampionRow />
           </View>

@@ -46,8 +46,8 @@ export default function RowMatch(props) {
 
   // Funkcja pomocnicza do określania koloru tekstu wewnątrz plakietki punktów
   const getTextColor = (pts) => {
-    if (pts == 1 || pts == 2) return "#003279"; // Niebieski tekst na żółtym tle
-    return "#FFFFFF"; // Biały tekst na czerwonym/zielonym tle
+    if (pts == 1 || pts == 2) return "#003279"; 
+    return "#FFFFFF"; 
   };
 
   return (
@@ -62,7 +62,6 @@ export default function RowMatch(props) {
     >
       {/* LEWA I ŚRODKOWA CZĘŚĆ: Data, Flagi, Nazwy i Wynik meczu */}
       <View style={styles.top}>
-        {/* Data i godzina */}
         <View>
           <Text style={styles.info}>{displayData.date}</Text>
           <Text style={styles.info}>{displayData.hour}</Text>
