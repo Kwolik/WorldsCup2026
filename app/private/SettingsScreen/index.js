@@ -40,7 +40,6 @@ export default function SettingScreen() {
   if (month < 10) month = "0" + month;
   var hours = new Date().getHours(); //Current Hours
 
-  //const bottomSheetRef = useRef(BottomSheet);
   const handleSheetChanges = useCallback((index) => {
     console.log("handleSheetChanges", index);
   }, []);
@@ -266,35 +265,6 @@ export default function SettingScreen() {
             />
           </View>
         )}
-        {/* {day + "." + month < "14.06" ||
-        (day + "." + month == "14.06" && hours < "21") ? (
-          <SafeAreaView style={styles.bottomSheet}>
-            <BottomSheet
-              ref={bottomSheetRef}
-              onChange={handleSheetChanges}
-              snapPoints={["5%", "60%", "100%"]}
-            >
-              <BottomSheetView style={styles.contentContainer}>
-                <View style={styles.viewTitle}>
-                  <Text style={styles.title}>Obstaw mistrza 🎉</Text>
-                </View>
-                {TeamList.map((team, index) => (
-                  <TouchableOpacity
-                    key={index}
-                    style={styles.team}
-                    onPress={() => {
-                      setChampion(team.value), setCodeChampion(team.code);
-                    }}
-                  >
-                    <Text style={styles.teamText}>{team.value}</Text>
-                  </TouchableOpacity>
-                ))}
-              </BottomSheetView>
-            </BottomSheet>
-          </SafeAreaView>
-        ) : (
-          <View></View>
-        )} */}
         <Snackbar
           visible={visible}
           style={{ backgroundColor: "#003279" }}
