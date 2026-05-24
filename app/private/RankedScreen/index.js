@@ -1,36 +1,56 @@
-import { View, ImageBackground } from "react-native";
+import { View, ImageBackground, Text } from "react-native";
 import { useState, useEffect } from "react";
 import styles from "../../../styles/Ranked/styles.js";
 import TopRanked from "../../../components/TopRanked/index.js";
 import PlayerRanked from "../../../components/PlayerRanked/index.js";
 import { db } from "../../../firebaseConfig.js";
-import { orderBy, collection, query, getDocs } from "firebase/firestore";
+import { orderBy, collection, query, onSnapshot } from "firebase/firestore";
 import LoadingScreen from "../../../components/LoadingScreen/index.js";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function RankedScreen() {
   const [matches, setMatches] = useState([]);
-
-  const topPlayers = async () => {
-    const todoRef = collection(db, "users");
-    const q = query(todoRef, orderBy("points", "desc"));
-    const doc_refs = await getDocs(q);
-    const match = [];
-
-    doc_refs.forEach((doc) => {
-      match.push({
-        id: doc.id,
-        name: doc.data().name,
-        photo: doc.data().photo,
-        points: doc.data().points,
-      });
-    });
-    setMatches(match);
-  };
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    topPlayers();
-  }, []);
+    const todoRef = collection(db, "users");
+    const q = query(todoRef, orderBy("points2026", "desc"));
+    const unsubscribe = onSnapshot(
+      q,
+      (querySnapshot) => {
+        const match = [];
+        querySnapshot.forEach((doc) => {
+          match.push({
+            id: doc.id,
+            name: doc.data().name,
+            photo: doc.data().photo,
+            points: doc.data().points2026 ?? doc.data().points,
+          });
+        });
+
+        setMatches(match);
+        setIsLoading(false);
+      },
+      (error) => {
+        console.error("Błąd nasłuchiwania rankingu:", error);
+        setIsLoading(false);
+      },
+    );
+
+    return () => unsubscribe();
+  }, []); 
+
+  if (isLoading) {
+    return (
+      <ImageBackground
+        source={require("../../../assets/background.jpg")}
+        style={styles.image}
+        resizeMode="stretch"
+      >
+        <LoadingScreen />
+      </ImageBackground>
+    );
+  }
 
   return (
     <ImageBackground
@@ -42,7 +62,8 @@ export default function RankedScreen() {
         <View style={styles.topRanked}>
           <TopRanked />
         </View>
-        {matches[0] ? (
+
+        {matches.length > 0 ? (
           <View style={styles.playerRanked}>
             {matches.map((player, number) => (
               <PlayerRanked
@@ -54,9 +75,7 @@ export default function RankedScreen() {
               />
             ))}
           </View>
-        ) : (
-          <LoadingScreen />
-        )}
+        ) : null}
       </SafeAreaView>
     </ImageBackground>
   );

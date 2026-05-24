@@ -16,6 +16,8 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     paddingLeft: 10,
     paddingRight: 10,
+    // ZMIANA: Dajemy wyższy zIndex dla góry, aby nakładała się na dół karty
+    zIndex: 2,
   },
   avatarWrapper: {
     position: "relative",
@@ -39,7 +41,6 @@ const styles = StyleSheet.create({
     height: 46,
     borderRadius: 23,
   },
-  // Mała pigułka punktowa podpięta pod awatar
   badge: {
     position: "absolute",
     bottom: -8,
@@ -72,7 +73,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "flex-end",
     marginTop: -18,
-    zIndex: -1,
+    zIndex: 1,
     borderBottomLeftRadius: 16,
     borderBottomRightRadius: 16,
   },

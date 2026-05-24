@@ -50,7 +50,6 @@ const styles = StyleSheet.create({
     marginTop: -32,
     zIndex: -1,
   },
-  // Mały zaokrąglony element użytkownika (Chip)
   playerChip: {
     flexDirection: "row",
     alignItems: "center",
@@ -72,7 +71,31 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "500",
     marginLeft: 6,
-    flexShrink: 1, // Pozwala tekstowi płynnie skrócić się do trzech kropek (...)
+    flexShrink: 1,
+  },
+  image: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    marginRight: 12,
+  },
+  viewFootballer: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+  },
+  view: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 12,
+  },
+  textFootballer: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "bold",
   },
 });
 

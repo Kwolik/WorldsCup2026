@@ -47,8 +47,8 @@ export default function SettingScreen() {
 
       try {
         const docRef = doc(db, "users", user.uid);
-        const docKing = doc(db, "king", user.uid);
-        const docFootballer = doc(db, "footballer", user.uid);
+        const docKing = doc(db, "king2026", user.uid);
+        const docFootballer = doc(db, "footballer2026", user.uid);
 
         const [docSnap, docSnapKing, docSnapFootballer] = await Promise.all([
           getDoc(docRef),
@@ -56,7 +56,7 @@ export default function SettingScreen() {
           getDoc(docFootballer),
         ]);
 
-        const todoRef = collection(db, "users", user.uid, "types");
+        const todoRef = collection(db, "users", user.uid, "types2026");
         const doc_refs = await getDocs(todoRef);
         const fetchedMatches = doc_refs.docs.map((document) => ({
           id: document.id,
@@ -70,7 +70,9 @@ export default function SettingScreen() {
           const data = docSnap.data();
           if (data.name) setNameUser(data.name);
           if (data.photo) setPhoto(data.photo);
-          if (data.points !== undefined) setPoints(data.points);
+
+          const userPoints = data.points2026 ?? data.points ?? 0;
+          setPoints(userPoints);
         }
 
         if (docSnapKing.exists()) {
@@ -115,7 +117,7 @@ export default function SettingScreen() {
           name: nameUser,
           email: auth.currentUser.email,
           photo: photo,
-          points: points,
+          points2026: points, // ZMIANA: Aktualizujemy pole points2026 zamiast lub obok starego pola
         },
         { merge: true },
       );
@@ -128,7 +130,7 @@ export default function SettingScreen() {
   const betFootballer = async () => {
     if (!auth.currentUser || kingFootballer.trim() === "") return;
     try {
-      await setDoc(doc(db, "footballer", auth.currentUser.uid), {
+      await setDoc(doc(db, "footballer2026", auth.currentUser.uid), {
         id: auth.currentUser.uid,
         name: kingFootballer,
         photo: photo,
@@ -140,7 +142,6 @@ export default function SettingScreen() {
     }
   };
 
-  // Funkcja uruchamiana po kliknięciu kraju na liście modalnej
   const selectChampion = async (selectedTeam) => {
     if (!auth.currentUser) return;
 
@@ -153,7 +154,7 @@ export default function SettingScreen() {
     setModalVisible(false);
 
     try {
-      await setDoc(doc(db, "king", auth.currentUser.uid), {
+      await setDoc(doc(db, "king2026", auth.currentUser.uid), {
         id: auth.currentUser.uid,
         code: flagCode,
         team: selectedTeam.value,
@@ -239,6 +240,7 @@ export default function SettingScreen() {
               textContentType="nickname"
             />
             <View style={styles.viewPoints}>
+              {/* Od teraz ten stan trzyma wartość z pola points2026 */}
               <Text style={styles.points}>{points} </Text>
               <Text style={styles.nick}>pkt</Text>
             </View>
@@ -255,9 +257,7 @@ export default function SettingScreen() {
           <View style={styles.top}>
             <Text style={styles.info1}>Mistrz Świata</Text>
 
-            <View
-              style={styles.champion}
-            >
+            <View style={styles.champion}>
               {codeChampion ? (
                 <CountryFlag
                   isoCode={codeChampion}

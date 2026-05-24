@@ -1,4 +1,4 @@
-import { View, ImageBackground, FlatList } from "react-native";
+import { View, ImageBackground, FlatList, Text } from "react-native";
 import { useEffect, useState } from "react";
 import styles from "../../../styles/Matches/styles.js";
 import NextMatch from "../../../components/NextMatch/index.js";
@@ -13,36 +13,50 @@ export default function MatchesScreen() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const todoRef = collection(db, "matches");
-    
-    // Dobra praktyka: sortujemy mecze po ID (czyli po dacie), aby układały się chronologicznie
+    const todoRef = collection(db, "matches2026");
     const q = query(todoRef, orderBy("id", "asc"));
 
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const matchArray = [];
-      querySnapshot.forEach((doc) => {
-        matchArray.push({
-          id: doc.id,
-          club1: doc.data().club1,
-          club1id: doc.data().club1id,
-          club2: doc.data().club2,
-          club2id: doc.data().club2id,
-          result: doc.data().result,
-          date: doc.data().date,
-          hour: doc.data().hour,
+    const unsubscribe = onSnapshot(
+      q,
+      (querySnapshot) => {
+        const matchArray = [];
+        querySnapshot.forEach((doc) => {
+          matchArray.push({
+            id: doc.id,
+            club1: doc.data().club1,
+            club1id: doc.data().club1id,
+            club2: doc.data().club2,
+            club2id: doc.data().club2id,
+            result: doc.data().result,
+            date: doc.data().date,
+            hour: doc.data().hour,
+          });
         });
-      });
-      
-      setMatches(matchArray);
-      setLoading(false);
-    }, (error) => {
-      console.error("Błąd pobierania meczów: ", error);
-      setLoading(false);
-    });
 
-    // Czyszczenie subskrypcji przy odmontowaniu komponentu
+        setMatches(matchArray);
+        setLoading(false); // Wyłącza ładowanie po otrzymaniu odpowiedzi z Firebase
+      },
+      (error) => {
+        console.error("Błąd pobierania meczów: ", error);
+        setLoading(false);
+      },
+    );
+
     return () => unsubscribe();
   }, []);
+
+  // KROK 1: Jeśli dane z sieci się jeszcze ładują, pokazujemy LoadingScreen na pełnym ekranie
+  if (loading) {
+    return (
+      <ImageBackground
+        source={require("../../../assets/background.jpg")}
+        style={styles.image}
+        resizeMode="stretch"
+      >
+        <LoadingScreen />
+      </ImageBackground>
+    );
+  }
 
   return (
     <ImageBackground
@@ -54,13 +68,13 @@ export default function MatchesScreen() {
         <View style={styles.matchNext}>
           <NextMatch />
         </View>
-        
-        {!loading && matches.length > 0 ? (
+
+        {matches.length > 0 && (
           <View style={styles.flatlist}>
             <FlatList
               data={matches}
               numColumns={1}
-              keyExtractor={(item) => item.id} // Dodajemy unikalny klucz dla wydajności listy
+              keyExtractor={(item) => item.id}
               renderItem={({ item }) => (
                 <RowMatch
                   id={item.id}
@@ -75,8 +89,6 @@ export default function MatchesScreen() {
               )}
             />
           </View>
-        ) : (
-          <LoadingScreen />
         )}
       </SafeAreaView>
     </ImageBackground>

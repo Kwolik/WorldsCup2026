@@ -10,9 +10,10 @@ import LoadingScreen from "../LoadingScreen/index.js";
 export default function ChampionRow() {
   const [king, setKing] = useState([]);
   const [uniqueTeams, setUniqueTeams] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const todoRef = collection(db, "king");
+    const todoRef = collection(db, "king2026");
     const unsubscribe = onSnapshot(todoRef, (querySnapshot) => {
       const kingData = [];
       const teamsSet = new Set();
@@ -32,7 +33,11 @@ export default function ChampionRow() {
       });
 
       setKing(kingData);
-      setUniqueTeams(Array.from(teamsSet)); // Tworzy czystą tablicę unikalnych drużyn
+      setUniqueTeams(Array.from(teamsSet));
+      setIsLoading(false);
+    }, (error) => {
+      console.error("Błąd pobierania danych:", error);
+      setIsLoading(false); 
     });
 
     return () => unsubscribe();
@@ -44,7 +49,7 @@ export default function ChampionRow() {
     return found ? found.code : "";
   };
 
-  if (uniqueTeams.length === 0) {
+  if (isLoading) {
     return <LoadingScreen />;
   }
 
@@ -52,7 +57,6 @@ export default function ChampionRow() {
     <View style={styles.mainWrapper}>
       {uniqueTeams.map((teamName, index) => {
         const flagCode = getFlagCode(teamName);
-        // Filtrujemy graczy, którzy wybrali akurat TĘ drużynę
         const votesForTeam = king.filter((k) => k.team === teamName);
 
         return (

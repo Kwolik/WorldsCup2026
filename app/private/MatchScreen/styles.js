@@ -3,7 +3,6 @@ import { StyleSheet } from "react-native";
 const styles = StyleSheet.create({
   image: {
     flex: 1,
-    resizeMode: "auto",
   },
   top: {
     backgroundColor: "#003279",
@@ -71,7 +70,8 @@ const styles = StyleSheet.create({
   },
   bottomSheet: {
     flex: 1,
-    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 24,
   },
   contentContainer: {
     flex: 1,
@@ -115,6 +115,85 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#FFFFFF",
     padding: 8,
+  },
+  viewModal: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.6)",
+  },
+  modal: {
+    backgroundColor: "#1e293b",
+    width: "85%",
+    borderRadius: 20,
+    padding: 24,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#334155",
+  },
+  viewModal2: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 25,
+  },
+  textModal: {
+    color: "#94a3b8",
+    marginBottom: 8,
+    fontSize: 12,
+  },
+  textinput: {
+    backgroundColor: "#0f172a",
+    color: "#fff",
+    width: 60,
+    height: 50,
+    borderRadius: 10,
+    textAlign: "center",
+    fontSize: 20,
+    fontWeight: "bold",
+  },
+  button: {
+    backgroundColor: "#22c55e",
+    width: "100%",
+    paddingVertical: 14,
+    borderRadius: 10,
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  textCalc: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+  buttonClose: {
+    width: "100%",
+    paddingVertical: 10,
+    alignItems: "center",
+  },
+  textClose: {
+    color: "#94a3b8",
+    fontSize: 14,
+  },
+  adminButton: {
+    backgroundColor: "#e11d48",
+    paddingVertical: 16,
+    marginHorizontal: 20,
+    borderRadius: 12,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    bottom: -250,
+  },
+  viewBlock: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 20,
+  },
+  textBlock: {
+    color: "#fff",
+    fontSize: 14,
+    textAlign: "center",
+    fontWeight: "500",
   },
 });
 

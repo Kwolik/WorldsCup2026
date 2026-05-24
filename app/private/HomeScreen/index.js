@@ -44,7 +44,7 @@ export default function HomeScreen() {
 
   const next3Matches = async () => {
     try {
-      const todoRef = collection(db, "matches");
+      const todoRef = collection(db, "matches2026");
       const yesterdayId = getFirestoreDateId(yesterday);
 
       const q = query(

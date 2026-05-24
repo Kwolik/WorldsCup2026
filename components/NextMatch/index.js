@@ -16,18 +16,13 @@ export default function NextMatch() {
   const fetchNextMatch = async () => {
     try {
       const now = new Date();
-      
-      // Generujemy aktualny string w formacie YYYYMMDDHHmm zgodny z Twoją strukturą ID w bazie
       const year = now.getFullYear();
       const month = String(now.getMonth() + 1).padStart(2, "0");
       const day = String(now.getDate()).padStart(2, "0");
       const hours = String(now.getHours()).padStart(2, "0");
       const minutes = String(now.getMinutes()).padStart(2, "0");
-      
       const currentTimestampString = `${year}${month}${day}${hours}${minutes}`;
-
-      const matchesRef = collection(db, "matches");
-      // Szukamy meczu, którego ID (data) jest większe niż "teraz" i sortujemy od najbliższego
+      const matchesRef = collection(db, "matches2026");
       const q = query(
         matchesRef, 
         where("id", ">", currentTimestampString), 

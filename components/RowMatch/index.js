@@ -15,7 +15,7 @@ export default function RowMatch(props) {
   useEffect(() => {
     if (!props.club1) {
       const updateMatches = async () => {
-        const todoRef = doc(db, "matches", id);
+        const todoRef = doc(db, "matches2026", id);
         const docSnap = await getDoc(todoRef);
         if (docSnap.exists()) {
           setMatch(docSnap.data());

@@ -30,7 +30,7 @@ export default function TypeResult(props) {
 
     try {
       await setDoc(
-        doc(db, "users", auth.currentUser.uid, "types", props.matchid),
+        doc(db, "users", auth.currentUser.uid, "types2026", props.matchid),
         {
           type: scoreValue,
           points: -1,

@@ -62,9 +62,7 @@ export default function Player(props) {
 
       {/* DÓŁ KARTY (Nick) */}
       <View style={styles.bottom}>
-        <Text style={styles.nick} numberOfLines={1}>
-          {props.name}
-        </Text>
+        <Text style={styles.nick}>{props.name}</Text>
       </View>
     </View>
   );
