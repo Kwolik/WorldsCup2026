@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   ImageBackground,
   Image,
+  Alert,
 } from "react-native";
 import React from "react";
 import styles from "./styles.js";
@@ -46,7 +47,13 @@ export default function LoginScreen() {
         .then(() => {
           router.replace("/private/HomeScreen");
         })
-        .catch((error) => console.error("Firebase Google Error:", error));
+        .catch((error) => {
+          // ZMIANA: Zamiast console.error, wyświetlamy natywny Alert
+          Alert.alert(
+            "Błąd logowania",
+            `Nie udało się zalogować przez Google: ${error.message}`,
+          );
+        });
     }
   }, [response]);
 
@@ -117,7 +124,12 @@ export default function LoginScreen() {
               if (resp?.user) {
                 router.replace("/private/HomeScreen");
               } else {
-                console.log(resp.error);
+                Alert.alert(
+                  "Błąd",
+                  resp.error?.message ||
+                    String(resp.error) ||
+                    "Wystąpił nieznany błąd",
+                );
               }
             }}
           >

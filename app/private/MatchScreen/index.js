@@ -168,7 +168,7 @@ export default function MatchScreen() {
           const userId = userDoc.id;
           const userData = userDoc.data();
 
-          const userTypeRef = doc(db, "users", userId, "types", id);
+          const userTypeRef = doc(db, "users", userId, "types2026", id);
           const userTypeSnap = await transaction.get(userTypeRef);
 
           if (userTypeSnap.exists()) {
