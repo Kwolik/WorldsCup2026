@@ -192,9 +192,6 @@ export default function GroupsScreen() {
       >
         <SafeAreaView style={[styles.container, styles.center]}>
           <ActivityIndicator size="large" color="#003279" />
-          <Text style={styles.loadingText}>
-            Pobieranie tabel turniejowych...
-          </Text>
         </SafeAreaView>
       </ImageBackground>
     );
