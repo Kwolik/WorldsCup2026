@@ -10,17 +10,19 @@ import {
   Modal,
 } from "react-native";
 import React, { useState, useEffect } from "react";
+import { useRouter } from "expo-router";
 import styles from "../../../styles/Settings/styles.js";
-import { Foundation } from "@expo/vector-icons";
+import { Foundation, MaterialIcons } from "@expo/vector-icons";
 import RowMatch from "../../../components/RowMatch/index.js";
 import * as ImagePicker from "expo-image-picker";
 import { auth, db } from "../../../firebaseConfig.js";
-import { doc, setDoc, collection, onSnapshot } from "firebase/firestore"; // ZMIANA: Dodano onSnapshot
+import { doc, setDoc, collection, onSnapshot } from "firebase/firestore";
 import LoadingScreen from "../../../components/LoadingScreen/index.js";
 import { Snackbar } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import CountryFlag from "react-native-country-flag";
 import { TeamList } from "../../../components/TeamList.js";
+import { appSignOut } from "../../../store.js";
 
 export default function SettingScreen() {
   const [points, setPoints] = useState(0);
@@ -32,7 +34,8 @@ export default function SettingScreen() {
   const [matches, setMatches] = useState([]);
   const [visible, setVisible] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
-  const [loading, setLoading] = useState(true); // NOWOŚĆ: Bezpieczniejsza obsługa ekranu ładowania
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   const onDismissSnackBar = () => setVisible(false);
 
@@ -43,32 +46,34 @@ export default function SettingScreen() {
   };
 
   useEffect(() => {
-    // Rejestrujemy nasłuchiwanie na stan zalogowania użytkownika
     const unsubscribeAuth = auth.onAuthStateChanged((user) => {
       if (!user) {
         setLoading(false);
+        router.replace("/LoginScreen");
         return;
       }
 
       setLoading(true);
 
-      // 1. Słuchacz czasu rzeczywistego dla profilu użytkownika (punkty, nazwa, foto)
       const userRef = doc(db, "users", user.uid);
-      const unsubscribeUser = onSnapshot(userRef, (docSnap) => {
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          if (data.name) setNameUser(data.name);
-          if (data.photo) setPhoto(data.photo);
-          
-          const userPoints = data.points2026 ?? data.points ?? 0;
-          setPoints(userPoints);
-        }
-        setLoading(false); // Dane podstawowe załadowane
-      }, (error) => {
-        console.error("Błąd profilu w czasie rzeczywistym:", error);
-      });
+      const unsubscribeUser = onSnapshot(
+        userRef,
+        (docSnap) => {
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            if (data.name) setNameUser(data.name);
+            if (data.photo) setPhoto(data.photo);
 
-      // 2. Słuchacz czasu rzeczywistego dla obstawionego Mistrza Świata
+            const userPoints = data.points2026 ?? data.points ?? 0;
+            setPoints(userPoints);
+          }
+          setLoading(false);
+        },
+        (error) => {
+          console.error("Błąd profilu w czasie rzeczywistym:", error);
+        },
+      );
+
       const kingRef = doc(db, "king2026", user.uid);
       const unsubscribeKing = onSnapshot(kingRef, (docSnapKing) => {
         if (docSnapKing.exists()) {
@@ -77,29 +82,33 @@ export default function SettingScreen() {
         }
       });
 
-      // 3. Słuchacz czasu rzeczywistego dla Króla Strzelców
       const footballerRef = doc(db, "footballer2026", user.uid);
-      const unsubscribeFootballer = onSnapshot(footballerRef, (docSnapFootballer) => {
-        if (docSnapFootballer.exists()) {
-          setKingFootballer(docSnapFootballer.data().name || "");
-        }
-      });
+      const unsubscribeFootballer = onSnapshot(
+        footballerRef,
+        (docSnapFootballer) => {
+          if (docSnapFootballer.exists()) {
+            setKingFootballer(docSnapFootballer.data().name || "");
+          }
+        },
+      );
 
-      // 4. Słuchacz czasu rzeczywistego dla listy typów meczów (wyniki i punkty za mecze)
       const typesCollectionRef = collection(db, "users", user.uid, "types2026");
-      const unsubscribeMatches = onSnapshot(typesCollectionRef, (querySnapshot) => {
-        const fetchedMatches = querySnapshot.docs.map((document) => ({
-          id: document.id,
-          points: document.data().points,
-          type: document.data().type,
-          winner: document.data().winner,
-        }));
-        setMatches(fetchedMatches);
-      }, (error) => {
-        console.error("Błąd subskrypcji meczów:", error);
-      });
+      const unsubscribeMatches = onSnapshot(
+        typesCollectionRef,
+        (querySnapshot) => {
+          const fetchedMatches = querySnapshot.docs.map((document) => ({
+            id: document.id,
+            points: document.data().points,
+            type: document.data().type,
+            winner: document.data().winner,
+          }));
+          setMatches(fetchedMatches);
+        },
+        (error) => {
+          console.error("Błąd subskrypcji meczów:", error);
+        },
+      );
 
-      // FUNKCJA CZYSZCZĄCA (Cleanup): Odpinamy wszystkie subskrypcje, gdy użytkownik wyjdzie z ekranu
       return () => {
         unsubscribeUser();
         unsubscribeKing();
@@ -147,6 +156,27 @@ export default function SettingScreen() {
     }
   };
 
+  // LOGIKA WYLOGOWANIA:
+  const handleLogout = () => {
+    Alert.alert(
+      "Wylogowanie",
+      "Czy na pewno chcesz się wylogować z aplikacji?",
+      [
+        { text: "Anuluj", style: "cancel" },
+        {
+          text: "Wyloguj",
+          style: "destructive",
+          onPress: async () => {
+            const resp = await appSignOut();
+            if (resp?.error) {
+              Alert.alert("Błąd", "Nie udało się bezpiecznie wylogować.");
+            }
+          },
+        },
+      ],
+    );
+  };
+
   const betFootballer = async () => {
     if (!auth.currentUser || kingFootballer.trim() === "") return;
     try {
@@ -158,7 +188,10 @@ export default function SettingScreen() {
       });
       setVisible(true);
     } catch (e) {
-      Alert.alert("Błąd", `Nie udało się zapisać króla strzelców: ${e.message}`);
+      Alert.alert(
+        "Błąd",
+        `Nie udało się zapisać króla strzelców: ${e.message}`,
+      );
     }
   };
 
@@ -187,7 +220,6 @@ export default function SettingScreen() {
     }
   };
 
-  // Zmiana warunku na jawny stan loading zamiast sprawdzania samego stringa nameUser
   if (loading) {
     return <LoadingScreen />;
   }
@@ -265,10 +297,21 @@ export default function SettingScreen() {
               <Text style={styles.nick}>pkt</Text>
             </View>
           </View>
+
+          {/* POPRAWKA: Przycisk Edycji danych oraz nowy przycisk Wylogowania obok siebie */}
           <View style={styles.bottom}>
             <TouchableOpacity style={styles.viewBottom} onPress={changeData}>
               <Foundation name="pencil" style={styles.icon} />
-              <Text style={styles.desc}>Edytuj swoje dane</Text>
+              <Text style={styles.desc} numberOfLines={1}>
+                Zapisz dane
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.viewBottom} onPress={handleLogout}>
+              <MaterialIcons name="logout" style={styles.icon} size={16} />
+              <Text style={styles.desc} numberOfLines={1}>
+                Wyloguj się
+              </Text>
             </TouchableOpacity>
           </View>
         </View>

@@ -28,6 +28,8 @@ import TypeResult from "../../../components/TypeResult/index.js";
 import LoadingScreen from "../../../components/LoadingScreen/index.js";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { MaterialIcons } from "@expo/vector-icons";
+// IMPORT: Pobieramy stan globalny użytkownika
+import { AuthStore } from "../../../store.js";
 
 const calculatePointsForMatch = (officialResult, userType) => {
   if (!officialResult || !userType) return 0;
@@ -35,18 +37,12 @@ const calculatePointsForMatch = (officialResult, userType) => {
   const [off1, off2] = officialResult.split(":").map(Number);
   const [type1, type2] = userType.split(":").map(Number);
 
-  // 1. Dokładny wynik (3 punkty)
-  if (off1 === type1 && off2 === type2) {
-    return 3;
-  }
+  if (off1 === type1 && off2 === type2) return 3;
 
-  // 2. Trafione rozstrzygnięcie / tendencja (1 punkt)
   const officialWinner = off1 > off2 ? "home" : off1 < off2 ? "away" : "draw";
   const userWinner = type1 > type2 ? "home" : type1 < type2 ? "away" : "draw";
 
-  if (officialWinner === userWinner) {
-    return 1;
-  }
+  if (officialWinner === userWinner) return 1;
 
   return 0;
 };
@@ -55,7 +51,7 @@ export default function MatchScreen() {
   const [match, setMatch] = useState(null);
   const [userInfo, setUserInfo] = useState([]);
   const [currentUserData, setCurrentUserData] = useState(null);
-  const [userBet, setUserBet] = useState("-:-"); // NOWOŚĆ: Przechowuje realnie pobrany z podkolekcji typ zalogowanego gracza
+  const [userBet, setUserBet] = useState("-:-");
   const [loading, setLoading] = useState(true);
   const { id } = useLocalSearchParams();
   const insets = useSafeAreaInsets();
@@ -63,6 +59,9 @@ export default function MatchScreen() {
   const [club1Score, setClub1Score] = useState("");
   const [club2Score, setClub2Score] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+
+  // Pobieramy bezpieczny stan użytkownika z Pullstate
+  const { user: globalUser } = AuthStore.useState();
 
   const ADMIN_UIDS = [
     "NRpRx8uUqYciM0EmXF6VTljLMwi1",
@@ -78,7 +77,6 @@ export default function MatchScreen() {
     }
   };
 
-  // NOWOŚĆ: Funkcja pobierająca typ aktualnie zalogowanego gracza z ścieżki użytkownika
   const fetchCurrentUserBet = async () => {
     const currentUser = auth?.currentUser;
     if (!currentUser || !id) return;
@@ -128,7 +126,7 @@ export default function MatchScreen() {
   const loadData = async () => {
     setLoading(true);
     await updateMatches();
-    await fetchCurrentUserBet(); // Pobieramy Twój typ przed zakończeniem ekranu ładowania
+    await fetchCurrentUserBet();
     await users();
     setLoading(false);
   };
@@ -164,12 +162,10 @@ export default function MatchScreen() {
     }
   };
 
+  // POPRAWKA: Weryfikacja konta admina na podstawie bezpiecznego AuthStore
   const isAdmin = () => {
-    const currentUser = auth?.currentUser;
-    return currentUser && ADMIN_UIDS.includes(currentUser.uid);
+    return globalUser && ADMIN_UIDS.includes(globalUser.uid);
   };
-
-  console.log(currentUserData && currentUserData.name);
 
   const handleSaveResult = async () => {
     if (club1Score.trim() === "" || club2Score.trim() === "") {
@@ -239,16 +235,13 @@ export default function MatchScreen() {
 
       Alert.alert(
         "Sukces",
-        `Wynik ${finalResultStr} został zapisany. Ranking oraz punkty graczy zostały zaktualizowane bez błędów transakcji!`,
+        `Wynik ${finalResultStr} został zapisany. Ranking oraz punkty graczy zostały zaktualizowane!`,
       );
       setIsModalVisible(false);
       updateMatches();
     } catch (error) {
-      console.error("Błąd podczas przeliczania punktów admina: ", error);
-      Alert.alert(
-        "Błąd",
-        "Wystąpił problem podczas zapisywania wyniku lub przeliczania punktów.",
-      );
+      console.error("Błąd podczas przeliczania punktów: ", error);
+      Alert.alert("Błąd", "Wystąpił problem podczas zapisywania wyniku.");
     } finally {
       setIsSaving(false);
     }
@@ -304,8 +297,10 @@ export default function MatchScreen() {
         </View>
       </View>
 
-      {/* SEKCJA ŚRODKOWA */}
-      <View style={{ flex: 1, marginBottom: -40 }}>
+      {/* SEKCJA ŚRODKOWA Z LISTĄ GRACZY */}
+      <View
+        style={{ flex: 1, paddingBottom: isAdmin() && !canBet() ? 80 : 20 }}
+      >
         {!canBet() ? (
           <FlatList
             data={userInfo}
@@ -320,13 +315,10 @@ export default function MatchScreen() {
               />
             )}
           />
-        ) : // POPRAWKA: Dodajemy unikalny key={currentUserData.name}
-        // Gdy stan zmieni się z null na "Kwolik", React Native całkowicie usunie i stworzy kafelkę <Player> na nowo,
-        // dzięki czemu Twój obstawiony wynik wygeneruje się prawidłowo.
-        currentUserData && currentUserData.name ? (
+        ) : currentUserData && currentUserData.name ? (
           <View style={styles.bottomSheet}>
             <Player
-              key={currentUserData.name} // <-- TO WYMUSI ODŚWIEŻENIE KAFELKI Z WYNIKIEM
+              key={currentUserData.name}
               id={currentUserData.id}
               name={currentUserData.name}
               photo={currentUserData.photo}
@@ -336,10 +328,23 @@ export default function MatchScreen() {
         ) : null}
       </View>
 
-      {/* PRZYCISK DLA ADMINA */}
+      {/* PRZYCISK DLA ADMINA (Z Pozycjonowaniem absolutnym na dole, by lista go nie przykryła) */}
       {isAdmin() && !canBet() && (
         <TouchableOpacity
-          style={styles.adminButton}
+          style={[
+            styles.adminButton,
+            {
+              position: "absolute",
+              bottom: insets.bottom + 20,
+              left: 20,
+              right: 20,
+              elevation: 5,
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.25,
+              shadowRadius: 3.84,
+            },
+          ]}
           onPress={() => setIsModalVisible(true)}
         >
           <MaterialIcons
@@ -354,7 +359,6 @@ export default function MatchScreen() {
 
       {/* WARUNEK DLA ZWYKŁYCH UŻYTKOWNIKÓW */}
       {canBet() ? (
-        // POPRAWKA: Blokujemy wyświetlenie komponentu dopóki dane usera oraz sam typ (userBet) nie zostaną pobrane
         currentUserData && currentUserData.name ? (
           <TypeResult
             club1={match.club1}
@@ -362,7 +366,7 @@ export default function MatchScreen() {
             club2={match.club2}
             club2id={match.club2id}
             matchid={id}
-            type={userBet} // ZMIANA: Przekazujemy realny typ z bazy przypisany do zalogowanego konta
+            type={userBet}
           />
         ) : null
       ) : null}
@@ -399,7 +403,6 @@ export default function MatchScreen() {
               </View>
             </View>
 
-            {/* AKCJE MODALA */}
             <TouchableOpacity
               style={styles.button}
               onPress={handleSaveResult}
