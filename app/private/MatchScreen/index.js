@@ -70,7 +70,7 @@ export default function MatchScreen() {
 
   const updateMatches = async () => {
     if (!id) return;
-    const todoRef = doc(db, "matches", id);
+    const todoRef = doc(db, "matches2026", id);
     const docSnap = await getDoc(todoRef);
     if (docSnap.exists()) {
       setMatch(docSnap.data());
@@ -155,7 +155,7 @@ export default function MatchScreen() {
     setIsSaving(true);
 
     try {
-      const matchRef = doc(db, "matches", id);
+      const matchRef = doc(db, "matches2026", id);
       await updateDoc(matchRef, { result: finalResultStr });
 
       const usersCollectionRef = collection(db, "users");

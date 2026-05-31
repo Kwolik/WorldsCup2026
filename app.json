@@ -13,6 +13,10 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "platforms": [
+      "ios",
+      "android"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.kwolik.WorldsCup2026"
@@ -26,13 +30,8 @@
       "package": "com.kwolik.WorldsCup2026",
       "permissions": [
         "RECEIVE_BOOT_COMPLETED",
-        "SCHEDULE_EXACT_ALARM",
-        "RECEIVE_BOOT_COMPLETED",
         "SCHEDULE_EXACT_ALARM"
       ]
-    },
-    "web": {
-      "favicon": "./assets/favicon.png"
     },
     "plugins": [
       "expo-web-browser",
