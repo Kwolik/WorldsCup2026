@@ -1,158 +1,61 @@
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  ImageBackground,
-  Image,
-  Alert,
-} from "react-native";
+import { StyleSheet, View, Text } from "react-native";
 import React from "react";
-import styles from "./styles.js";
-import { router } from "expo-router";
-import { appSignIn } from "../../store.js";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
-import * as WebBrowser from "expo-web-browser";
-import * as Google from "expo-auth-session/providers/google";
-import { GoogleAuthProvider, signInWithCredential } from "firebase/auth";
-import { auth } from "../../firebaseConfig";
+import { AuthStore } from "../../store";
+import { useRouter, useSegments, useRootNavigationState } from "expo-router";
+import LoadingScreen from "../../components/LoadingScreen";
 
-WebBrowser.maybeCompleteAuthSession();
+export default function Page() {
+  const segments = useSegments();
+  const router = useRouter();
+  const navigationState = useRootNavigationState();
 
-export default function LoginScreen() {
-  const [email, onChangeEmail] = React.useState("");
-  const [password, onChangePassword] = React.useState("");
-  const insets = useSafeAreaInsets();
+  // Pobieramy stany z poprawionego store.js
+  const { initialized, isLoggedIn } = AuthStore.useState();
 
-  const topPadding = insets.top + 40;
-
-  // 1. Konfiguracja Requestu Google na później
-  const [request, response, promptAsync] = Google.useAuthRequest({
-    useProxy: false,
-    webClientId: "TWÓJ-WEB-CLIENT-ID.apps.googleusercontent.com",
-    iosClientId: "TWÓJ-IOS-CLIENT-ID.apps.googleusercontent.com", // jeśli masz
-    androidClientId: "TWÓJ-ANDROID-CLIENT-ID.apps.googleusercontent.com", // jeśli masz
-  });
-
-  // 2. Obsługa odpowiedzi z Google
   React.useEffect(() => {
-    if (response?.type === "success") {
-      const { id_token } = response.params;
-      const credential = GoogleAuthProvider.credential(id_token);
-
-      signInWithCredential(auth, credential)
-        .then(() => {
-          router.replace("/private/HomeScreen");
-        })
-        .catch((error) => {
-          // ZMIANA: Zamiast console.error, wyświetlamy natywny Alert
-          Alert.alert(
-            "Błąd logowania",
-            `Nie udało się zalogować przez Google: ${error.message}`,
-          );
-        });
+    // 1. Blokada bezpieczeństwa: Czekamy, aż Expo Router zbuduje strukturę linków
+    // oraz aż Firebase zwróci informację o sesji (initialized: true)
+    if (!navigationState?.key || !initialized) {
+      return;
     }
-  }, [response]);
 
-  const handleGoogleSignIn = () => {
-    promptAsync(); // Uruchamia okno logowania
-  };
+    // 2. Sprawdzamy, w jakim folderze/miejscu aktualnie znajduje się użytkownik
+    const currentSegment = segments[0];
+    const inPrivateGroup = currentSegment === "private";
+    const inLoginScreen = currentSegment === "LoginScreen";
 
+    console.log(
+      `[Guard] Sesja gotowa. Zalogowany: ${isLoggedIn}, Aktualny segment: /${currentSegment || ""}`,
+    );
+
+    // 3. LOGIKA STRAŻNIKA:
+    if (!isLoggedIn) {
+      // Przypadek A: Użytkownik NIE jest zalogowany, a próbuje wejść do strefy prywatnej
+      if (inPrivateGroup || !inLoginScreen) {
+        console.log("[Guard] Niezalogowany! Przekierowanie do /LoginScreen");
+        router.replace("/LoginScreen");
+      }
+    } else {
+      // Przypadek B: Użytkownik JEST zalogowany, ale utknął na ekranie logowania lub stronie startowej
+      if (inLoginScreen || !inPrivateGroup) {
+        console.log(
+          "[Guard] Zalogowany! Automatyczne przeniesienie do /private/HomeScreen",
+        );
+        router.replace("/private/HomeScreen");
+      }
+    }
+  }, [isLoggedIn, segments, navigationState?.key, initialized]);
+
+  // Dopóki trwa ładowanie, pokazujemy LoadingScreen
   return (
-    <ImageBackground
-      source={require("../../assets/background.jpg")}
-      style={styles.image}
-      resizeMode="cover"
-    >
-      <SafeAreaView style={{ flex: 1, paddingTop: topPadding }}>
-        {/* Sekcja Email */}
-        <View style={styles.email}>
-          <View style={styles.descView}>
-            <Text style={styles.emailTitle}>Email</Text>
-          </View>
-          <View style={styles.inputView}>
-            <TextInput
-              style={styles.emailInput}
-              onChangeText={onChangeEmail}
-              autoComplete="email"
-              keyboardType="email-address"
-              textContentType="emailAddress"
-            />
-          </View>
-        </View>
-
-        {/* Sekcja Hasło */}
-        <View style={styles.email}>
-          <View style={styles.descView}>
-            <Text style={styles.emailTitle}>Hasło</Text>
-          </View>
-          <View style={styles.inputView}>
-            <TextInput
-              style={styles.emailInput}
-              onChangeText={onChangePassword}
-              autoComplete="current-password"
-              secureTextEntry={true}
-              textContentType="password"
-            />
-          </View>
-        </View>
-
-        {/* Sekcja Przycisków - Zmiana na dwa przyciski obok siebie */}
-        <View style={styles.buttons}>
-          {/* Przycisk Google */}
-          {/* <TouchableOpacity
-            style={styles.googleButton}
-            onPress={handleGoogleSignIn}
-          >
-            <Image
-              source={{
-                uri: "https://www.gstatic.com/images/branding/product/2x/googleg_48dp.png",
-              }}
-              style={styles.googleIcon}
-            />
-            <Text style={styles.googleButtonText}>Sign in with Google</Text>
-          </TouchableOpacity> */}
-
-          {/* Przycisk Zaloguj */}
-          <TouchableOpacity
-            style={styles.buttonLogged}
-            onPress={async () => {
-              const resp = await appSignIn(email, password);
-              if (resp?.user) {
-                router.replace("/private/HomeScreen");
-              } else {
-                Alert.alert(
-                  "Błąd",
-                  resp.error?.message ||
-                    String(resp.error) ||
-                    "Wystąpił nieznany błąd",
-                );
-              }
-            }}
-          >
-            <Text style={styles.buttonTitle}>Zaloguj się</Text>
-          </TouchableOpacity>
-        </View>
-
-        <TouchableOpacity
-          style={styles.routeRegistiration}
-          onPress={() => router.push("/RegistrationScreen")}
-        >
-          <View style={styles.descViewFirst}>
-            <Text style={styles.descTextFirst}>
-              Nie jesteś jeszcze zarejestrowany?
-            </Text>
-          </View>
-          <View style={styles.descViewTwo}>
-            <Text style={styles.descTextTwo}>
-              Kliknij i przejdź do rejestracji
-            </Text>
-          </View>
-        </TouchableOpacity>
-      </SafeAreaView>
-    </ImageBackground>
+    <View style={styles.container}>
+      <LoadingScreen />
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+});

@@ -55,6 +55,7 @@ export default function MatchScreen() {
   const [match, setMatch] = useState(null);
   const [userInfo, setUserInfo] = useState([]);
   const [currentUserData, setCurrentUserData] = useState(null);
+  const [userBet, setUserBet] = useState("-:-"); // NOWOŚĆ: Przechowuje realnie pobrany z podkolekcji typ zalogowanego gracza
   const [loading, setLoading] = useState(true);
   const { id } = useLocalSearchParams();
   const insets = useSafeAreaInsets();
@@ -74,6 +75,27 @@ export default function MatchScreen() {
     const docSnap = await getDoc(todoRef);
     if (docSnap.exists()) {
       setMatch(docSnap.data());
+    }
+  };
+
+  // NOWOŚĆ: Funkcja pobierająca typ aktualnie zalogowanego gracza z ścieżki użytkownika
+  const fetchCurrentUserBet = async () => {
+    const currentUser = auth?.currentUser;
+    if (!currentUser || !id) return;
+
+    try {
+      const betRef = doc(db, "users", currentUser.uid, "types2026", id);
+      const betSnap = await getDoc(betRef);
+      if (betSnap.exists() && betSnap.data().type) {
+        setUserBet(betSnap.data().type);
+      } else {
+        setUserBet("-:-");
+      }
+    } catch (error) {
+      console.error(
+        "Błąd podczas pobierania typu zalogowanego gracza: ",
+        error,
+      );
     }
   };
 
@@ -106,6 +128,7 @@ export default function MatchScreen() {
   const loadData = async () => {
     setLoading(true);
     await updateMatches();
+    await fetchCurrentUserBet(); // Pobieramy Twój typ przed zakończeniem ekranu ładowania
     await users();
     setLoading(false);
   };
@@ -114,6 +137,7 @@ export default function MatchScreen() {
     setMatch(null);
     setUserInfo([]);
     setCurrentUserData(null);
+    setUserBet("-:-");
     loadData();
   }, [id]);
 
@@ -144,6 +168,8 @@ export default function MatchScreen() {
     const currentUser = auth?.currentUser;
     return currentUser && ADMIN_UIDS.includes(currentUser.uid);
   };
+
+  console.log(currentUserData && currentUserData.name);
 
   const handleSaveResult = async () => {
     if (club1Score.trim() === "" || club2Score.trim() === "") {
@@ -294,19 +320,20 @@ export default function MatchScreen() {
               />
             )}
           />
-        ) : (
-          currentUserData &&
-          currentUserData.name && (
-            <View style={styles.bottomSheet}>
-              <Player
-                id={currentUserData.id}
-                name={currentUserData.name}
-                photo={currentUserData.photo}
-                matchid={id}
-              />
-            </View>
-          )
-        )}
+        ) : // POPRAWKA: Dodajemy unikalny key={currentUserData.name}
+        // Gdy stan zmieni się z null na "Kwolik", React Native całkowicie usunie i stworzy kafelkę <Player> na nowo,
+        // dzięki czemu Twój obstawiony wynik wygeneruje się prawidłowo.
+        currentUserData && currentUserData.name ? (
+          <View style={styles.bottomSheet}>
+            <Player
+              key={currentUserData.name} // <-- TO WYMUSI ODŚWIEŻENIE KAFELKI Z WYNIKIEM
+              id={currentUserData.id}
+              name={currentUserData.name}
+              photo={currentUserData.photo}
+              matchid={id}
+            />
+          </View>
+        ) : null}
       </View>
 
       {/* PRZYCISK DLA ADMINA */}
@@ -327,14 +354,17 @@ export default function MatchScreen() {
 
       {/* WARUNEK DLA ZWYKŁYCH UŻYTKOWNIKÓW */}
       {canBet() ? (
-        <TypeResult
-          club1={match.club1}
-          club1id={match.club1id}
-          club2={match.club2}
-          club2id={match.club2id}
-          matchid={id}
-          type={match.typeMatch}
-        />
+        // POPRAWKA: Blokujemy wyświetlenie komponentu dopóki dane usera oraz sam typ (userBet) nie zostaną pobrane
+        currentUserData && currentUserData.name ? (
+          <TypeResult
+            club1={match.club1}
+            club1id={match.club1id}
+            club2={match.club2}
+            club2id={match.club2id}
+            matchid={id}
+            type={userBet} // ZMIANA: Przekazujemy realny typ z bazy przypisany do zalogowanego konta
+          />
+        ) : null
       ) : null}
 
       {/* OKNO MODALNE DO WPISYWANIA WYNIKU */}

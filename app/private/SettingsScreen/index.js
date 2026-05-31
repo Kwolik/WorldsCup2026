@@ -15,7 +15,7 @@ import { Foundation } from "@expo/vector-icons";
 import RowMatch from "../../../components/RowMatch/index.js";
 import * as ImagePicker from "expo-image-picker";
 import { auth, db } from "../../../firebaseConfig.js";
-import { doc, getDoc, setDoc, getDocs, collection } from "firebase/firestore";
+import { doc, setDoc, collection, onSnapshot } from "firebase/firestore"; // ZMIANA: Dodano onSnapshot
 import LoadingScreen from "../../../components/LoadingScreen/index.js";
 import { Snackbar } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -32,6 +32,7 @@ export default function SettingScreen() {
   const [matches, setMatches] = useState([]);
   const [visible, setVisible] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
+  const [loading, setLoading] = useState(true); // NOWOŚĆ: Bezpieczniejsza obsługa ekranu ładowania
 
   const onDismissSnackBar = () => setVisible(false);
 
@@ -42,53 +43,72 @@ export default function SettingScreen() {
   };
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(async (user) => {
-      if (!user) return;
+    // Rejestrujemy nasłuchiwanie na stan zalogowania użytkownika
+    const unsubscribeAuth = auth.onAuthStateChanged((user) => {
+      if (!user) {
+        setLoading(false);
+        return;
+      }
 
-      try {
-        const docRef = doc(db, "users", user.uid);
-        const docKing = doc(db, "king2026", user.uid);
-        const docFootballer = doc(db, "footballer2026", user.uid);
+      setLoading(true);
 
-        const [docSnap, docSnapKing, docSnapFootballer] = await Promise.all([
-          getDoc(docRef),
-          getDoc(docKing),
-          getDoc(docFootballer),
-        ]);
+      // 1. Słuchacz czasu rzeczywistego dla profilu użytkownika (punkty, nazwa, foto)
+      const userRef = doc(db, "users", user.uid);
+      const unsubscribeUser = onSnapshot(userRef, (docSnap) => {
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          if (data.name) setNameUser(data.name);
+          if (data.photo) setPhoto(data.photo);
+          
+          const userPoints = data.points2026 ?? data.points ?? 0;
+          setPoints(userPoints);
+        }
+        setLoading(false); // Dane podstawowe załadowane
+      }, (error) => {
+        console.error("Błąd profilu w czasie rzeczywistym:", error);
+      });
 
-        const todoRef = collection(db, "users", user.uid, "types2026");
-        const doc_refs = await getDocs(todoRef);
-        const fetchedMatches = doc_refs.docs.map((document) => ({
+      // 2. Słuchacz czasu rzeczywistego dla obstawionego Mistrza Świata
+      const kingRef = doc(db, "king2026", user.uid);
+      const unsubscribeKing = onSnapshot(kingRef, (docSnapKing) => {
+        if (docSnapKing.exists()) {
+          setChampion(docSnapKing.data().team || "");
+          setCodeChampion(docSnapKing.data().code || "");
+        }
+      });
+
+      // 3. Słuchacz czasu rzeczywistego dla Króla Strzelców
+      const footballerRef = doc(db, "footballer2026", user.uid);
+      const unsubscribeFootballer = onSnapshot(footballerRef, (docSnapFootballer) => {
+        if (docSnapFootballer.exists()) {
+          setKingFootballer(docSnapFootballer.data().name || "");
+        }
+      });
+
+      // 4. Słuchacz czasu rzeczywistego dla listy typów meczów (wyniki i punkty za mecze)
+      const typesCollectionRef = collection(db, "users", user.uid, "types2026");
+      const unsubscribeMatches = onSnapshot(typesCollectionRef, (querySnapshot) => {
+        const fetchedMatches = querySnapshot.docs.map((document) => ({
           id: document.id,
           points: document.data().points,
           type: document.data().type,
           winner: document.data().winner,
         }));
         setMatches(fetchedMatches);
+      }, (error) => {
+        console.error("Błąd subskrypcji meczów:", error);
+      });
 
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          if (data.name) setNameUser(data.name);
-          if (data.photo) setPhoto(data.photo);
-
-          const userPoints = data.points2026 ?? data.points ?? 0;
-          setPoints(userPoints);
-        }
-
-        if (docSnapKing.exists()) {
-          setChampion(docSnapKing.data().team || "");
-          setCodeChampion(docSnapKing.data().code || "");
-        }
-
-        if (docSnapFootballer.exists()) {
-          setKingFootballer(docSnapFootballer.data().name || "");
-        }
-      } catch (error) {
-        Alert.alert("Błąd podczas ładowania danych profilu:", error.message);
-      }
+      // FUNKCJA CZYSZCZĄCA (Cleanup): Odpinamy wszystkie subskrypcje, gdy użytkownik wyjdzie z ekranu
+      return () => {
+        unsubscribeUser();
+        unsubscribeKing();
+        unsubscribeFootballer();
+        unsubscribeMatches();
+      };
     });
 
-    return unsubscribe;
+    return () => unsubscribeAuth();
   }, []);
 
   const pickImage = async () => {
@@ -117,13 +137,13 @@ export default function SettingScreen() {
           name: nameUser,
           email: auth.currentUser.email,
           photo: photo,
-          points2026: points, // ZMIANA: Aktualizujemy pole points2026 zamiast lub obok starego pola
+          points2026: points,
         },
         { merge: true },
       );
       setVisible(true);
     } catch (e) {
-      Alert.alert("Błąd zapisu danych");
+      Alert.alert("Błąd", "Nie udało się zapisać zmian danych profilu.");
     }
   };
 
@@ -138,7 +158,7 @@ export default function SettingScreen() {
       });
       setVisible(true);
     } catch (e) {
-      Alert.alert("Błąd zapisu króla strzelców:", e.message);
+      Alert.alert("Błąd", `Nie udało się zapisać króla strzelców: ${e.message}`);
     }
   };
 
@@ -163,11 +183,12 @@ export default function SettingScreen() {
       });
       setVisible(true);
     } catch (e) {
-      Alert.alert("Błąd zapisu mistrza:", e.message);
+      Alert.alert("Błąd", `Nie udało się zapisać mistrza: ${e.message}`);
     }
   };
 
-  if (!nameUser) {
+  // Zmiana warunku na jawny stan loading zamiast sprawdzania samego stringa nameUser
+  if (loading) {
     return <LoadingScreen />;
   }
 
@@ -240,7 +261,6 @@ export default function SettingScreen() {
               textContentType="nickname"
             />
             <View style={styles.viewPoints}>
-              {/* Od teraz ten stan trzyma wartość z pola points2026 */}
               <Text style={styles.points}>{points} </Text>
               <Text style={styles.nick}>pkt</Text>
             </View>

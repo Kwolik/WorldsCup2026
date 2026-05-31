@@ -15,11 +15,23 @@ export const AuthStore = new Store({
   user: null,
 });
 
+// Funkcja pomocnicza ekstrahująca tylko czyste dane (zabezpieczenie dla Pullstate)
+const getCleanUser = (user) => {
+  if (!user) return null;
+  return {
+    uid: user.uid,
+    email: user.email,
+    displayName: user.displayName,
+    photoURL: user.photoURL,
+  };
+};
+
+// Globalny nasłuchiwalnik sesji Firebase
 onAuthStateChanged(auth, (user) => {
-  console.log("onAuthStateChange ", user);
+  console.log("onAuthStateChange -> Zmiana stanu sesji. Zalogowany:", !!user);
   AuthStore.update((store) => {
-    store.user = user;
-    store.isLoggedIn = user ? true : false;
+    store.user = getCleanUser(user); // POPRAWKA: Czysty obiekt zamiast instancji Firebase
+    store.isLoggedIn = !!user;
     store.initialized = true;
   });
 });
@@ -27,12 +39,15 @@ onAuthStateChanged(auth, (user) => {
 export const appSignIn = async (email, password) => {
   try {
     const resp = await signInWithEmailAndPassword(auth, email, password);
+
     AuthStore.update((store) => {
-      store.user = resp.user;
-      store.isLoggedIn = resp.user ? true : false;
+      store.user = getCleanUser(resp.user); // POPRAWKA: Czysty obiekt
+      store.isLoggedIn = true;
     });
-    return { user: auth.currentUser };
+
+    return { user: getCleanUser(resp.user) };
   } catch (e) {
+    console.error("Błąd metody appSignIn:", e);
     return { error: e };
   }
 };
@@ -54,23 +69,27 @@ export const appSignUp = async (email, password, displayName) => {
   try {
     const resp = await createUserWithEmailAndPassword(auth, email, password);
 
+    // Aktualizujemy profil w Firebase Auth
     await updateProfile(resp.user, { displayName });
 
-    AuthStore.update((store) => {
-      store.user = auth.currentUser;
-      store.isLoggedIn = true;
-    });
-
-    await setDoc(doc(db, "users", auth.currentUser.uid), {
-      id: auth.currentUser.uid,
+    // Tworzymy dokument użytkownika w Firestore
+    await setDoc(doc(db, "users", resp.user.uid), {
+      id: resp.user.uid,
       name: displayName,
-      email: auth.currentUser.email,
+      email: resp.user.email,
       photo: "",
       points: 0,
     });
 
-    return { user: auth.currentUser };
+    // Aktualizujemy bezpiecznie sklep Pullstate
+    AuthStore.update((store) => {
+      store.user = getCleanUser(auth.currentUser);
+      store.isLoggedIn = true;
+    });
+
+    return { user: getCleanUser(auth.currentUser) };
   } catch (e) {
+    console.error("Błąd metody appSignUp:", e);
     return { error: e };
   }
 };

@@ -16,7 +16,7 @@ export default function Player(props) {
   const [data, setData] = useState();
 
   useEffect(() => {
-    const todoRef = doc(db, "users", props.id, "types", props.matchid);
+    const todoRef = doc(db, "users", props.id, "types2026", props.matchid);
     const unsubscribe = onSnapshot(todoRef, (docSnap) => {
       if (docSnap.exists()) {
         setData(docSnap.data());
