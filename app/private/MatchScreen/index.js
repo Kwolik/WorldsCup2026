@@ -366,7 +366,7 @@ export default function MatchScreen() {
             club2={match.club2}
             club2id={match.club2id}
             matchid={id}
-            type={userBet}
+            type={match.typeMatch}
           />
         ) : null
       ) : null}
