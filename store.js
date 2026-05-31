@@ -78,7 +78,7 @@ export const appSignUp = async (email, password, displayName) => {
       name: displayName,
       email: resp.user.email,
       photo: "",
-      points: 0,
+      points2026: 0,
     });
 
     // Aktualizujemy bezpiecznie sklep Pullstate
