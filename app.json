@@ -26,6 +26,8 @@
       "package": "com.kwolik.WorldsCup2026",
       "permissions": [
         "RECEIVE_BOOT_COMPLETED",
+        "SCHEDULE_EXACT_ALARM",
+        "RECEIVE_BOOT_COMPLETED",
         "SCHEDULE_EXACT_ALARM"
       ]
     },
@@ -42,6 +44,19 @@
         }
       ],
       "expo-router"
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "bf2245d4-d359-4a46-85ab-99399652b6cf"
+      }
+    },
+    "owner": "kwolik",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/bf2245d4-d359-4a46-85ab-99399652b6cf"
+    }
   }
 }
