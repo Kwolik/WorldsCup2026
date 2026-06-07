@@ -38,13 +38,6 @@
     },
     "plugins": [
       "expo-web-browser",
-      [
-        "expo-notifications",
-        {
-          "icon": "./assets/icon.png",
-          "color": "#003279"
-        }
-      ],
       "expo-router"
     ],
     "extra": {
@@ -55,7 +48,7 @@
     },
     "owner": "worlds2026",
     "runtimeVersion": {
-      "policy": "appVersion"
+      "policy": "sdkVersion"
     },
     "updates": {
       "url": "https://u.expo.dev/bf2245d4-d359-4a46-85ab-99399652b6cf"
