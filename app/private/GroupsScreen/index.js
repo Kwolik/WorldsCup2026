@@ -114,7 +114,9 @@ export default function GroupsScreen() {
         const data = await response.json();
 
         if (data.standings) {
-          const formattedGroups = data.standings.map((groupData) => ({
+          const formattedGroups = data.standings
+            .filter((s) => s.type === "TOTAL")
+            .map((groupData) => ({
             id: groupData.group,
             name: groupData.group.replace("_", " "),
             teams: groupData.table.map((row) => {
@@ -167,22 +169,6 @@ export default function GroupsScreen() {
     fetchWorldCupStandings();
   }, []);
 
-  const renderTeamRow = (team) => (
-    <View key={team.rank} style={styles.teamRow}>
-      <View style={[styles.leftContainer, { flex: 1, paddingRight: 10 }]}>
-        <Text style={styles.rankNumber}>{team.rank}</Text>
-
-        <CountryFlag isoCode={team.isoCode} size={20} style={styles.flag} />
-
-        <Text style={styles.teamName} numberOfLines={1} ellipsizeMode="tail">
-          {team.name}
-        </Text>
-      </View>
-
-      <Text style={styles.pointsText}>{team.points} pkt</Text>
-    </View>
-  );
-
   if (loading) {
     return (
       <ImageBackground
@@ -230,7 +216,22 @@ export default function GroupsScreen() {
               </View>
 
               <View style={styles.teamsListContainer}>
-                {item.teams.map((team) => renderTeamRow(team))}
+                {item.teams.map((team) => (
+                  <View key={`${item.id}-${team.name}`} style={styles.teamRow}>
+                    <View
+                      style={[styles.leftContainer, { flex: 1, paddingRight: 10 }]}
+                    >
+                      <Text style={styles.rankNumber}>{team.rank}</Text>
+
+                      <CountryFlag isoCode={team.isoCode} size={20} style={styles.flag} />
+
+                      <Text style={styles.teamName} numberOfLines={1} ellipsizeMode="tail">
+                        {team.name}
+                      </Text>
+                    </View>
+                    <Text style={styles.pointsText}>{team.points} pkt</Text>
+                  </View>
+                ))}
               </View>
             </View>
           )}

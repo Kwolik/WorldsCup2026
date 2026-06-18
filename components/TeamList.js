@@ -23,7 +23,7 @@ export const TeamList = [
   { value: "Iran", code: "ir" },
   { value: "Japonia", code: "jp" },
   { value: "Jordania", code: "jo" },
-  { value: "Kameroon", code: "cm" },
+  { value: "Kamerun", code: "cm" },
   { value: "Kanada", code: "ca" },
   { value: "Katar", code: "qa" },
   { value: "Kolumbia", code: "co" },

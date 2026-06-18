@@ -4,10 +4,11 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
     justifyContent: "space-between",
-    width: "90%",
+    width: "90.5%",
   },
   top: {
-    width: 100,
+    flex: 1,
+    marginHorizontal: 2,
     justifyContent: "flex-end",
     marginTop: 24,
     zIndex: 1,
@@ -27,25 +28,32 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   nick: {
-    fontSize: 16,
+    fontSize: 15,
     marginBottom: 6,
     color: "#003279",
     marginTop: 6,
+    textAlign: "center",
+    paddingHorizontal: 4,
+    width: "100%", // Dodano, aby adjustsFontSizeToFit działało poprawnie
+    fontWeight: "500",
   },
   bottom: {
-    height: 44,
+    height: 52,
     backgroundColor: "#FFFFFF",
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
     justifyContent: "flex-end",
-    alignItems: "center",
     marginTop: -18,
     zIndex: -1,
   },
   points: {
     color: "#003279",
     fontWeight: "bold",
-    marginBottom: 4,
+    marginBottom: 6,
+    textAlign: "center",
+    width: "100%",
+    paddingHorizontal: 2,
+    fontSize: 14, // Zmieniono z 16 na 14
   },
   firstPlace: {
     backgroundColor: "#FDDA13",

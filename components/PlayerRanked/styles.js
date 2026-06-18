@@ -2,28 +2,29 @@ import { StyleSheet } from "react-native";
 
 const styles = StyleSheet.create({
   container: {
-    width: "44%",
+    width: "45%",
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 12,
+    marginBottom: 14,
     marginLeft: 4,
     marginRight: 4,
   },
   top: {
     width: "100%",
-    height: 64,
+    height: 68,
     backgroundColor: "#003279",
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    borderRadius: 20,
+    borderRadius: 24,
     paddingLeft: 8,
     paddingRight: 8,
     zIndex: 1,
   },
   position: {
     color: "#FFFFFF",
-    fontSize: 18,
+    fontSize: 16,
+    fontWeight: "500",
   },
   avatar: {
     width: 46,
@@ -32,23 +33,24 @@ const styles = StyleSheet.create({
   },
   result: {
     color: "#FFFFFF",
-    fontSize: 20,
-    fontWeight: "bold",
+    fontSize: 18,
+    fontWeight: "700",
   },
   bottom: {
     width: "100%",
-    height: 42,
+    height: 48,
     backgroundColor: "#FFFFFF",
     alignItems: "center",
     justifyContent: "flex-end",
-    marginTop: -18,
+    marginTop: -22,
     borderBottomLeftRadius: 16,
     borderBottomRightRadius: 16,
   },
   nick: {
     color: "#003279",
-    fontSize: 16,
-    bottom: 2,
+    fontSize: 15,
+    bottom: 3,
+    fontWeight: "500",
   },
 });
 

@@ -38,7 +38,7 @@ export default function RankedScreen() {
     );
 
     return () => unsubscribe();
-  }, []); 
+  }, []);
 
   if (isLoading) {
     return (

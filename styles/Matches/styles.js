@@ -7,7 +7,7 @@ const styles = StyleSheet.create({
   },
   image: {
     flex: 1,
-    resizeMode: "auto", //upewnic sie czy background dobrze sie skaluje
+    resizeMode: "auto",
   },
   matchNext: {
     justifyContent: "center",
@@ -18,7 +18,7 @@ const styles = StyleSheet.create({
     width: "88%",
     marginLeft: 4,
     marginTop: 4,
-    height: "74%",
+    height: "85%",
   },
 });
 
